@@ -1,0 +1,12 @@
+E:\Empire Tecknologies Cloud\ZAM_ZAM_08052026\Empire_ERP.Core\bin\Release\net7.0\Empire_ERP.Core.deps.json
+E:\Empire Tecknologies Cloud\ZAM_ZAM_08052026\Empire_ERP.Core\bin\Release\net7.0\Empire_ERP.Core.dll
+E:\Empire Tecknologies Cloud\ZAM_ZAM_08052026\Empire_ERP.Core\bin\Release\net7.0\Empire_ERP.Core.pdb
+E:\Empire Tecknologies Cloud\ZAM_ZAM_08052026\Empire_ERP.Core\obj\Release\net7.0\Empire_ERP.Core.csproj.AssemblyReference.cache
+E:\Empire Tecknologies Cloud\ZAM_ZAM_08052026\Empire_ERP.Core\obj\Release\net7.0\Empire_ERP.Core.GeneratedMSBuildEditorConfig.editorconfig
+E:\Empire Tecknologies Cloud\ZAM_ZAM_08052026\Empire_ERP.Core\obj\Release\net7.0\Empire_ERP.Core.AssemblyInfoInputs.cache
+E:\Empire Tecknologies Cloud\ZAM_ZAM_08052026\Empire_ERP.Core\obj\Release\net7.0\Empire_ERP.Core.AssemblyInfo.cs
+E:\Empire Tecknologies Cloud\ZAM_ZAM_08052026\Empire_ERP.Core\obj\Release\net7.0\Empire_ERP.Core.csproj.CoreCompileInputs.cache
+E:\Empire Tecknologies Cloud\ZAM_ZAM_08052026\Empire_ERP.Core\obj\Release\net7.0\Empire_ERP.Core.dll
+E:\Empire Tecknologies Cloud\ZAM_ZAM_08052026\Empire_ERP.Core\obj\Release\net7.0\refint\Empire_ERP.Core.dll
+E:\Empire Tecknologies Cloud\ZAM_ZAM_08052026\Empire_ERP.Core\obj\Release\net7.0\Empire_ERP.Core.pdb
+E:\Empire Tecknologies Cloud\ZAM_ZAM_08052026\Empire_ERP.Core\obj\Release\net7.0\ref\Empire_ERP.Core.dll
