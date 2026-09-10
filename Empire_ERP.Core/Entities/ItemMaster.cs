@@ -45,4 +45,19 @@ namespace Empire_ERP.Core.Entities
         public int? CAT_CODE { get; set; }
         public int? SUB_CAT_CODE { get; set; }
     }
+
+    public class ItemBulkUploadRow
+    {
+        public int RowNo { get; set; }
+        public string? ItemName { get; set; }
+        public string? Category { get; set; }
+        public string? Packing { get; set; }
+        public string? SaleRate { get; set; }
+        public string? FailureReason { get; set; }
+        public int? GROUP_CODE { get; set; }
+        public int? CAT_CODE { get; set; }
+        public int? IUNIT_CODE { get; set; }
+        public int? PUNIT_CODE { get; set; }
+        public double? SALE_RATE { get; set; }
+    }
 }

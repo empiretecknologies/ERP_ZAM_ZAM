@@ -168,6 +168,199 @@
         overflow-y: auto; /* vertical scroll enable */
     }
 
+    #ItemBulkUploadModal .modal-dialog {
+        max-width: 1100px;
+    }
+
+    #ItemBulkUploadModal .modal-body {
+        min-height: 430px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+    }
+
+    .item-bulk-steps {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 18px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #dee2e6;
+        gap: 0;
+    }
+
+        .item-bulk-steps .item-bulk-step {
+            display: flex;
+            align-items: center;
+            color: #6c757d;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+            .item-bulk-steps .item-bulk-step.active {
+                color: var(--theme-blue);
+                font-weight: 600;
+            }
+
+            .item-bulk-steps .item-bulk-step.done {
+                color: var(--theme-blue);
+            }
+
+            .item-bulk-steps .item-bulk-step .item-bulk-step-no {
+                display: inline-block;
+                width: 26px;
+                height: 26px;
+                line-height: 24px;
+                text-align: center;
+                border: 1px solid #c5c5c5;
+                margin-right: 8px;
+                background: #fff;
+                color: #6c757d;
+                font-size: 13px;
+            }
+
+            .item-bulk-steps .item-bulk-step.active .item-bulk-step-no,
+            .item-bulk-steps .item-bulk-step.done .item-bulk-step-no {
+                background: var(--theme-blue);
+                border-color: var(--theme-blue);
+                color: #fff;
+            }
+
+        .item-bulk-steps .item-bulk-step-line {
+            width: 90px;
+            height: 1px;
+            background: #c5c5c5;
+            margin: 0 16px;
+        }
+
+        .item-bulk-steps .item-bulk-step.done + .item-bulk-step-line {
+            background: var(--theme-blue);
+        }
+
+    .item-bulk-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+        .item-bulk-toolbar .form-label {
+            margin-bottom: 0;
+            font-weight: 600;
+        }
+
+    .item-bulk-dropzone {
+        position: relative;
+        border: 1px dashed var(--theme-blue);
+        background: #f8fafc;
+        padding: 48px 20px 36px;
+        text-align: center;
+        cursor: pointer;
+        min-height: 260px;
+    }
+
+        .item-bulk-dropzone.dragover {
+            background: #eef6fa;
+            border-style: solid;
+        }
+
+        .item-bulk-dropzone > i {
+            color: var(--theme-blue);
+            font-size: 38px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .item-bulk-dropzone .item-bulk-drop-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .item-bulk-dropzone .item-bulk-drop-hint {
+            font-size: 13px;
+            color: #6c757d;
+            margin-top: 4px;
+            margin-bottom: 14px;
+        }
+
+    .item-bulk-file-name {
+        margin-top: 12px;
+        font-weight: 600;
+        color: var(--theme-blue);
+        min-height: 20px;
+    }
+
+    .item-bulk-busy {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(248, 250, 252, 0.92);
+        text-align: center;
+        padding-top: 90px;
+        z-index: 2;
+        cursor: default;
+    }
+
+        .item-bulk-busy.show {
+            display: block;
+        }
+
+        .item-bulk-busy i {
+            color: var(--theme-blue);
+            font-size: 26px;
+        }
+
+        .item-bulk-busy p {
+            margin-top: 10px;
+            margin-bottom: 0;
+            font-weight: 600;
+            color: var(--theme-blue);
+        }
+
+    .item-bulk-summary {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+        .item-bulk-summary .item-bulk-summary-box {
+            flex: 1;
+            border: 1px solid #dee2e6;
+            padding: 10px 14px;
+            background: #fff;
+        }
+
+            .item-bulk-summary .item-bulk-summary-box span {
+                display: block;
+                font-size: 12px;
+                color: #6c757d;
+            }
+
+            .item-bulk-summary .item-bulk-summary-box strong {
+                font-size: 20px;
+                color: var(--theme-blue);
+            }
+
+            .item-bulk-summary .item-bulk-summary-box.failed strong {
+                color: var(--theme-red);
+            }
+
+    .item-bulk-review-block {
+        margin-bottom: 12px;
+    }
+
+        .item-bulk-review-block .form-label {
+            font-weight: 600;
+        }
+
+    #bulkSuccessGrid, #bulkFailedGrid {
+        min-height: 170px;
+        max-height: 230px;
+    }
+
 </style>
 <div class="card">
     <div class="card-header">
@@ -288,6 +481,7 @@
                         <input class="form-control" id="REMARKS" type="text" autocomplete="off">
                     </div>
                     <div class="col-xl-12 mt-2 text-end">
+                        <button class="btn btn-light waves-effect waves-light" id="BtnItemBulkUpload" type="button"><i class="fa fa-upload"></i> Item Bulk Upload</button>
                         <button class="btn btn-danger btn-delete" id="BtnDelete" style="display:none"><i class="fa fa-trash"></i> | Delete</button>
                         <button class="btn btn-primary btn-save" id="BtnSave"><i class="fa fa-save"></i> | Save</button>
                     </div>
@@ -442,6 +636,66 @@
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
+    <div class="modal fade" id="ItemBulkUploadModal" tabindex="-1" role="dialog" aria-labelledby="itemBulkUploadLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="itemBulkUploadLabel">Item Bulk Upload</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="item-bulk-steps">
+                        <div class="item-bulk-step active" id="bulkStepLabel1"><span class="item-bulk-step-no">1</span> Upload File</div>
+                        <div class="item-bulk-step-line"></div>
+                        <div class="item-bulk-step" id="bulkStepLabel2"><span class="item-bulk-step-no">2</span> Review</div>
+                    </div>
+                    <div id="bulkStep1">
+                        <div class="item-bulk-toolbar">
+                            <label class="form-label">Select Excel file</label>
+                            <button type="button" class="btn btn-light waves-effect waves-light" id="BtnDownloadItemBulkTemplate"><i class="fa fa-download"></i> Download Excel Template</button>
+                        </div>
+                        <div class="item-bulk-dropzone" id="itemBulkDropzone">
+                            <i class="fa fa-file-excel"></i>
+                            <div class="item-bulk-drop-title">Drop Excel file here</div>
+                            <div class="item-bulk-drop-hint">or click Upload. Columns: ItemName, Category, Packing, Sale Rate</div>
+                            <button type="button" class="btn btn-primary waves-effect waves-light" id="BtnSelectItemBulkFile"><i class="fa fa-upload"></i> Upload</button>
+                            <div class="item-bulk-file-name" id="itemBulkFileName"></div>
+                            <div class="item-bulk-busy" id="itemBulkBusy">
+                                <i class="fa fa-spinner fa-spin"></i>
+                                <p>Validating Excel file...</p>
+                            </div>
+                        </div>
+                        <input type="file" id="ItemBulkUploadFile" accept=".xlsx,.xls" class="d-none" />
+                    </div>
+                    <div id="bulkStep2" style="display:none;">
+                        <div class="item-bulk-summary">
+                            <div class="item-bulk-summary-box">
+                                <span>Successful Records</span>
+                                <strong id="bulkSuccessCount">0</strong>
+                            </div>
+                            <div class="item-bulk-summary-box failed">
+                                <span>Failed Records</span>
+                                <strong id="bulkFailedCount">0</strong>
+                            </div>
+                        </div>
+                        <div class="item-bulk-review-block">
+                            <label class="form-label">Successful Records</label>
+                            <div id="bulkSuccessGrid"></div>
+                        </div>
+                        <div class="item-bulk-review-block">
+                            <label class="form-label">Failed Records</label>
+                            <div id="bulkFailedGrid"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" id="BtnItemBulkBack" style="display:none;"><i class="fa fa-arrow-left"></i> Back</button>
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="BtnItemBulkComplete" style="display:none;"><i class="fa fa-check"></i> Complete</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <input type="hidden" id="unitcode_hidden" />

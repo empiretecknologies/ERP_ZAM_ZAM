@@ -1772,5 +1772,238 @@ namespace Empire_ERP.Infrastructure.Repositories
             }
             return response;
         }
+
+        public MyHttpResponseMessage ProcessBulkUpload(List<ItemBulkUploadRow> rows, Common common)
+        {
+            MyHttpResponseMessage response = new MyHttpResponseMessage();
+            response.msgType = 2;
+            response.msg = "Data not found in our records";
+            try
+            {
+                var Menu = _menuRepository.GetMenu(common.MenuID);
+                string? table = string.Empty;
+                if (Menu.data != null)
+                {
+                    var menu = (Menu)Menu.data;
+                    table = menu.TABLE1;
+                }
+
+                if (String.IsNullOrWhiteSpace(table))
+                {
+                    response.data = "";
+                    response.msg = "Something went wrong! please try again later.";
+                    response.msgType = 2;
+                    return response;
+                }
+
+                if (rows == null || rows.Count == 0)
+                {
+                    response.msg = "No records found in the Excel file.";
+                    response.msgType = 2;
+                    return response;
+                }
+
+                var itemGroups = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                var categories = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                var units = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                var existingNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                string connectionString = new SQLService().getconnstring();
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    SqlCommand groupCommand = new SqlCommand("SELECT GROUP_CODE,GROUP_NAME FROM TBL_ITEMSGROUP WHERE DLT = 'T' AND ASTATUS = 'Y' AND GROUP_TYPE = 'S'", connection);
+                    using (SqlDataReader reader = groupCommand.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string name = Convert.ToString(reader["GROUP_NAME"]) ?? "";
+                            if (!string.IsNullOrWhiteSpace(name) && !itemGroups.ContainsKey(name.Trim()))
+                                itemGroups.Add(name.Trim(), Convert.ToInt32(reader["GROUP_CODE"]));
+                        }
+                    }
+
+                    SqlCommand categoryCommand = new SqlCommand("SELECT GROUP_CODE,GROUP_NAME FROM TBL_CATEGORY WHERE DLT = 'T'", connection);
+                    using (SqlDataReader reader = categoryCommand.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string name = Convert.ToString(reader["GROUP_NAME"]) ?? "";
+                            if (!string.IsNullOrWhiteSpace(name) && !categories.ContainsKey(name.Trim()))
+                                categories.Add(name.Trim(), Convert.ToInt32(reader["GROUP_CODE"]));
+                        }
+                    }
+
+                    SqlCommand unitCommand = new SqlCommand("SELECT GROUP_CODE,GROUP_NAME FROM TBL_UNIT WHERE DLT = 'T'", connection);
+                    using (SqlDataReader reader = unitCommand.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string name = Convert.ToString(reader["GROUP_NAME"]) ?? "";
+                            if (!string.IsNullOrWhiteSpace(name) && !units.ContainsKey(name.Trim()))
+                                units.Add(name.Trim(), Convert.ToInt32(reader["GROUP_CODE"]));
+                        }
+                    }
+
+                    SqlCommand nameCommand = new SqlCommand("SELECT ITEM_NAME FROM " + table + " WHERE DLT = 'T' AND MENU_ID = '" + common.MenuID + "'", connection);
+                    using (SqlDataReader reader = nameCommand.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string name = Convert.ToString(reader["ITEM_NAME"]) ?? "";
+                            if (!string.IsNullOrWhiteSpace(name))
+                                existingNames.Add(name.Trim());
+                        }
+                    }
+                }
+
+                var successRecords = new List<ItemBulkUploadRow>();
+                var failedRecords = new List<ItemBulkUploadRow>();
+                var fileNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                foreach (var row in rows)
+                {
+                    var reasons = new List<string>();
+                    string itemName = (row.ItemName ?? "").Trim();
+                    string category = (row.Category ?? "").Trim();
+                    string packing = (row.Packing ?? "").Trim();
+                    string saleRateText = (row.SaleRate ?? "").Trim();
+
+                    row.ItemName = itemName;
+                    row.Category = category;
+                    row.Packing = packing;
+                    row.SaleRate = saleRateText;
+
+                    if (string.IsNullOrWhiteSpace(itemName))
+                        reasons.Add("Item name is required.");
+                    else if (existingNames.Contains(itemName))
+                        reasons.Add("Name Already Exist !....");
+                    else if (fileNames.Contains(itemName))
+                        reasons.Add("Duplicate Item Name in file.");
+
+                    if (string.IsNullOrWhiteSpace(category))
+                        reasons.Add("Category is required.");
+                    else if (!itemGroups.ContainsKey(category) && !categories.ContainsKey(category))
+                        reasons.Add("Category not found.");
+
+                    double saleRate = 0;
+                    if (string.IsNullOrWhiteSpace(saleRateText))
+                        reasons.Add("Sale Rate is required.");
+                    else if (!double.TryParse(saleRateText, out saleRate))
+                        reasons.Add("Sale Rate is not valid.");
+
+                    if (reasons.Count > 0)
+                    {
+                        row.FailureReason = string.Join(" ", reasons);
+                        failedRecords.Add(row);
+                        continue;
+                    }
+
+                    if (itemGroups.ContainsKey(category))
+                        row.GROUP_CODE = itemGroups[category];
+                    if (categories.ContainsKey(category))
+                        row.CAT_CODE = categories[category];
+                    if (!string.IsNullOrWhiteSpace(packing) && units.ContainsKey(packing))
+                    {
+                        row.IUNIT_CODE = units[packing];
+                        row.PUNIT_CODE = units[packing];
+                    }
+                    row.SALE_RATE = saleRate;
+                    fileNames.Add(itemName);
+                    existingNames.Add(itemName);
+                    successRecords.Add(row);
+                }
+
+                response.data = successRecords;
+                response.data2 = failedRecords;
+                response.msgType = 1;
+                response.msg = "File processed successfully.";
+            }
+            catch (Exception ex)
+            {
+                string _catchMessage = ex.Message;
+                if (ex.InnerException != null)
+                {
+                    _catchMessage += "<br/>" + ex.InnerException.Message;
+                }
+                response.msg = _catchMessage;
+                response.msgType = 2;
+            }
+            return response;
+        }
+
+        public MyHttpResponseMessage CompleteBulkUpload(List<ItemBulkUploadRow> rows, Common common)
+        {
+            MyHttpResponseMessage response = new MyHttpResponseMessage();
+            response.msgType = 2;
+            response.msg = "Data not found in our records";
+            try
+            {
+                if (rows == null || rows.Count == 0)
+                {
+                    response.msg = "No valid records to insert.";
+                    response.msgType = 2;
+                    return response;
+                }
+
+                int inserted = 0;
+                int failed = 0;
+                foreach (var row in rows)
+                {
+                    if (row.SALE_RATE == null && !string.IsNullOrWhiteSpace(row.SaleRate))
+                    {
+                        double parsedRate;
+                        if (double.TryParse(row.SaleRate, out parsedRate))
+                            row.SALE_RATE = parsedRate;
+                    }
+
+                    ItemMaster itemMaster = new ItemMaster();
+                    itemMaster.ITEM_CODE = 0;
+                    itemMaster.ITEM_NAME = row.ItemName;
+                    itemMaster.PACK = row.Packing;
+                    itemMaster.SALE_RATE = row.SALE_RATE;
+                    itemMaster.GROUP_CODE = row.GROUP_CODE;
+                    itemMaster.CAT_CODE = row.CAT_CODE;
+                    itemMaster.IUNIT_CODE = row.IUNIT_CODE;
+                    itemMaster.PUNIT_CODE = row.PUNIT_CODE;
+                    itemMaster.ASTATUS = "Y";
+                    itemMaster.BITYPE = 2;
+                    itemMaster.ITEM_TYPE = "F";
+                    itemMaster.PURCHASE_RATE = 0;
+
+                    var saveResponse = Save(itemMaster, common);
+                    if (saveResponse.msgType == 1)
+                        inserted++;
+                    else
+                        failed++;
+                }
+
+                if (inserted > 0)
+                {
+                    response.msgType = 1;
+                    response.msg = inserted + " record(s) added successfully.";
+                    if (failed > 0)
+                        response.msg += " " + failed + " record(s) could not be inserted.";
+                    response.data = inserted;
+                }
+                else
+                {
+                    response.msgType = 2;
+                    response.msg = "No records were inserted.";
+                }
+            }
+            catch (Exception ex)
+            {
+                string _catchMessage = ex.Message;
+                if (ex.InnerException != null)
+                {
+                    _catchMessage += "<br/>" + ex.InnerException.Message;
+                }
+                response.msg = _catchMessage;
+                response.msgType = 2;
+            }
+            return response;
+        }
     }
 }

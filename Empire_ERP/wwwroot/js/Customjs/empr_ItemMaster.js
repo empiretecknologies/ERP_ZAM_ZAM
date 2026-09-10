@@ -126,7 +126,71 @@ var empr_ItemMaster = {
                 !Permissions.r_VIEW && $('#BtnQuickSearch').hide();
                 (!Permissions.r_ADD && !Permissions.r_EDIT) && $('#BtnSave').hide();
                 (!Permissions.r_ADD && !Permissions.r_EDIT) && $('#BtnSaveBarcode').hide();
+                !Permissions.r_ADD && $('#BtnItemBulkUpload').hide();
             }
+
+            $('#BtnItemBulkUpload').click(function () {
+                empr_ItemMaster.OpenBulkUploadModal();
+            });
+
+            $('#BtnDownloadItemBulkTemplate').click(function () {
+                empr_ItemMaster.DownloadExcelTemplate();
+            });
+
+            $('#BtnSelectItemBulkFile').click(function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $('#ItemBulkUploadFile').click();
+            });
+
+            $('#itemBulkDropzone').on('click', function (e) {
+                if ($(e.target).closest('#BtnSelectItemBulkFile').length || $('#itemBulkBusy').hasClass('show')) {
+                    return;
+                }
+                $('#ItemBulkUploadFile').click();
+            });
+
+            $('#itemBulkDropzone').on('dragover', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(this).addClass('dragover');
+            });
+
+            $('#itemBulkDropzone').on('dragleave', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(this).removeClass('dragover');
+            });
+
+            $('#itemBulkDropzone').on('drop', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(this).removeClass('dragover');
+                if ($('#itemBulkBusy').hasClass('show')) {
+                    return;
+                }
+                var files = e.originalEvent.dataTransfer.files;
+                if (files && files.length > 0) {
+                    empr_ItemMaster.HandleBulkExcelFile(files[0]);
+                }
+            });
+
+            $('#ItemBulkUploadFile').change(function () {
+                var file = this.files && this.files[0];
+                if (file) {
+                    empr_ItemMaster.HandleBulkExcelFile(file);
+                }
+                $(this).val('');
+            });
+
+            $('#BtnItemBulkComplete').click(function () {
+                empr_ItemMaster.CompleteBulkUpload();
+            });
+
+            $('#BtnItemBulkBack').click(function () {
+                empr_ItemMaster.ResetBulkUploadModal();
+            });
+
             $("#barcode").prop("disabled", true);
         });
     },
@@ -2062,5 +2126,248 @@ var empr_ItemMaster = {
             const fileURL = window.location.origin + hdnUrl;
             ShowImage(fileURL);
         }
+    },
+    bulkSuccessRecords: [],
+    OpenBulkUploadModal: function () {
+        empr_ItemMaster.ResetBulkUploadModal();
+        $('#ItemBulkUploadModal').modal('show');
+    },
+    ResetBulkUploadModal: function () {
+        empr_ItemMaster.SetBulkUploadBusy(false);
+        empr_ItemMaster.bulkSuccessRecords = [];
+        $('#itemBulkFileName').text('');
+        $('#ItemBulkUploadFile').val('');
+        $('#BtnItemBulkComplete').hide().prop('disabled', false);
+        empr_ItemMaster.SetBulkUploadStep(1);
+    },
+    SetBulkUploadBusy: function (isBusy) {
+        if (isBusy) {
+            $('#itemBulkBusy').addClass('show');
+            $('#BtnSelectItemBulkFile').prop('disabled', true);
+            $('#BtnDownloadItemBulkTemplate').prop('disabled', true);
+        } else {
+            $('#itemBulkBusy').removeClass('show');
+            $('#BtnSelectItemBulkFile').prop('disabled', false);
+            $('#BtnDownloadItemBulkTemplate').prop('disabled', false);
+        }
+    },
+    SetBulkUploadStep: function (step) {
+        $('.item-bulk-step').removeClass('active done');
+        $('#bulkStep1').hide();
+        $('#bulkStep2').hide();
+        $('#bulkStep' + step).show();
+        if (step == 2) {
+            $('#bulkStepLabel1').addClass('done');
+            $('#bulkStepLabel2').addClass('active');
+            $('#BtnItemBulkComplete').show();
+            $('#BtnItemBulkBack').show();
+        } else {
+            $('#bulkStepLabel1').addClass('active');
+            $('#BtnItemBulkComplete').hide();
+            $('#BtnItemBulkBack').hide();
+        }
+    },
+    DownloadExcelTemplate: function () {
+        if (typeof ExcelJS === 'undefined' || typeof saveAs === 'undefined') {
+            empr_helper.notify("Excel template could not be generated.", 2);
+            return;
+        }
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Item Bulk Upload');
+        worksheet.columns = [
+            { header: 'ItemName', key: 'ItemName', width: 40 },
+            { header: 'Category', key: 'Category', width: 25 },
+            { header: 'Packing', key: 'Packing', width: 15 },
+            { header: 'Sale Rate', key: 'SaleRate', width: 15 }
+        ];
+        workbook.xlsx.writeBuffer().then(function (buffer) {
+            saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'ItemBulkUploadTemplate.xlsx');
+        });
+    },
+    HandleBulkExcelFile: function (file) {
+        if (!file) {
+            return;
+        }
+        var fileName = (file.name || '').toLowerCase();
+        if (fileName.indexOf('.xlsx') === -1 && fileName.indexOf('.xls') === -1) {
+            empr_helper.notify("Please select an Excel file.", 2);
+            return;
+        }
+        $('#itemBulkFileName').text(file.name);
+        empr_ItemMaster.ProcessBulkExcelFile(file);
+    },
+    GetBulkCellText: function (cell) {
+        if (!cell || cell.value === null || cell.value === undefined) {
+            return '';
+        }
+        var value = cell.value;
+        if (typeof value === 'object') {
+            if (value.text !== undefined && value.text !== null) {
+                return String(value.text).trim();
+            }
+            if (value.result !== undefined && value.result !== null) {
+                return String(value.result).trim();
+            }
+            if (value.richText && value.richText.length) {
+                return value.richText.map(function (x) { return x.text; }).join('').trim();
+            }
+        }
+        return String(value).trim();
+    },
+    NormalizeBulkHeader: function (header) {
+        return (header || '').replace(/\s+/g, '').toLowerCase();
+    },
+    ProcessBulkExcelFile: function (file) {
+        if (typeof ExcelJS === 'undefined') {
+            empr_helper.notify("Excel processing is not available.", 2);
+            return;
+        }
+        empr_ItemMaster.SetBulkUploadBusy(true);
+
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var workbook = new ExcelJS.Workbook();
+            workbook.xlsx.load(e.target.result).then(function () {
+                var worksheet = workbook.worksheets[0];
+                if (!worksheet) {
+                    empr_ItemMaster.BulkProcessFailed("Excel sheet was not found.");
+                    return;
+                }
+                var headerRow = worksheet.getRow(1);
+                var columnMap = {};
+                headerRow.eachCell(function (cell, colNumber) {
+                    var header = empr_ItemMaster.NormalizeBulkHeader(empr_ItemMaster.GetBulkCellText(cell));
+                    if (header) {
+                        columnMap[header] = colNumber;
+                    }
+                });
+                if (!columnMap['itemname'] || !columnMap['category'] || !columnMap['packing'] || !columnMap['salerate']) {
+                    empr_ItemMaster.BulkProcessFailed("Excel template must contain columns: ItemName, Category, Packing, Sale Rate.");
+                    return;
+                }
+
+                var rows = [];
+                worksheet.eachRow(function (row, rowNumber) {
+                    if (rowNumber === 1) {
+                        return;
+                    }
+                    var itemName = empr_ItemMaster.GetBulkCellText(row.getCell(columnMap['itemname']));
+                    var category = empr_ItemMaster.GetBulkCellText(row.getCell(columnMap['category']));
+                    var packing = empr_ItemMaster.GetBulkCellText(row.getCell(columnMap['packing']));
+                    var saleRate = empr_ItemMaster.GetBulkCellText(row.getCell(columnMap['salerate']));
+                    if (itemName === '' && category === '' && packing === '' && saleRate === '') {
+                        return;
+                    }
+                    rows.push({
+                        RowNo: rowNumber,
+                        ItemName: itemName,
+                        Category: category,
+                        Packing: packing,
+                        SaleRate: saleRate
+                    });
+                });
+
+                if (rows.length === 0) {
+                    empr_ItemMaster.BulkProcessFailed("No records found in the Excel file.");
+                    return;
+                }
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/ItemMaster/ProcessBulkUpload',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify(rows),
+                    cache: false,
+                    success: function (data) {
+                        if (data.msgType == 1) {
+                            empr_ItemMaster.ShowBulkReview(data.data || [], data.data2 || []);
+                        } else {
+                            empr_ItemMaster.BulkProcessFailed(data.msg);
+                        }
+                    },
+                    error: function () {
+                        empr_ItemMaster.BulkProcessFailed("An error occurred while processing the Excel file.");
+                    }
+                });
+            }).catch(function () {
+                empr_ItemMaster.BulkProcessFailed("Unable to read the Excel file.");
+            });
+        };
+        reader.onerror = function () {
+            empr_ItemMaster.BulkProcessFailed("Unable to read the Excel file.");
+        };
+        reader.readAsArrayBuffer(file);
+    },
+    BulkProcessFailed: function (message) {
+        empr_ItemMaster.SetBulkUploadBusy(false);
+        empr_ItemMaster.SetBulkUploadStep(1);
+        empr_helper.notify(message, 2);
+    },
+    ShowBulkReview: function (successRecords, failedRecords) {
+        empr_ItemMaster.SetBulkUploadBusy(false);
+        empr_ItemMaster.bulkSuccessRecords = successRecords || [];
+        var failed = failedRecords || [];
+        $('#bulkSuccessCount').text(empr_ItemMaster.bulkSuccessRecords.length);
+        $('#bulkFailedCount').text(failed.length);
+        var mapRow = function (r) {
+            return {
+                rowNo: r.rowNo != null ? r.rowNo : r.RowNo,
+                itemName: r.itemName || r.ItemName || '',
+                category: r.category || r.Category || '',
+                packing: r.packing || r.Packing || '',
+                saleRate: r.saleRate || r.SaleRate || '',
+                failureReason: r.failureReason || r.FailureReason || ''
+            };
+        };
+        var successCols = [
+            { dataField: 'rowNo', caption: 'Row', width: 70 },
+            { dataField: 'itemName', caption: 'ItemName' },
+            { dataField: 'category', caption: 'Category' },
+            { dataField: 'packing', caption: 'Packing', width: 120 },
+            { dataField: 'saleRate', caption: 'Sale Rate', width: 120 }
+        ];
+        var failedCols = [
+            { dataField: 'rowNo', caption: 'Row', width: 70 },
+            { dataField: 'itemName', caption: 'ItemName' },
+            { dataField: 'category', caption: 'Category' },
+            { dataField: 'packing', caption: 'Packing', width: 120 },
+            { dataField: 'saleRate', caption: 'Sale Rate', width: 120 },
+            { dataField: 'failureReason', caption: 'Failure Reason' }
+        ];
+        empr_helper.dxGridbindingWithoutFeatures('#bulkSuccessGrid', successCols, empr_ItemMaster.bulkSuccessRecords.map(mapRow), 'BulkSuccess', 'none');
+        empr_helper.dxGridbindingWithoutFeatures('#bulkFailedGrid', failedCols, failed.map(mapRow), 'BulkFailed', 'none');
+        empr_ItemMaster.SetBulkUploadStep(2);
+        if (empr_ItemMaster.bulkSuccessRecords.length === 0) {
+            $('#BtnItemBulkComplete').hide();
+        }
+    },
+    CompleteBulkUpload: function () {
+        if (!empr_ItemMaster.bulkSuccessRecords || empr_ItemMaster.bulkSuccessRecords.length === 0) {
+            empr_helper.notify("No valid records to insert.", 2);
+            return;
+        }
+        $('#BtnItemBulkComplete').prop('disabled', true);
+        $('#Loader').show();
+        $.ajax({
+            type: 'POST',
+            url: '/ItemMaster/CompleteBulkUpload',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(empr_ItemMaster.bulkSuccessRecords),
+            cache: false,
+            success: function (data) {
+                $('#Loader').hide();
+                $('#BtnItemBulkComplete').prop('disabled', false);
+                empr_helper.notify(data.msg, data.msgType);
+                if (data.msgType == 1) {
+                    $('#ItemBulkUploadModal').modal('hide');
+                    empr_ItemMaster.ResetBulkUploadModal();
+                }
+            },
+            error: function () {
+                $('#Loader').hide();
+                $('#BtnItemBulkComplete').prop('disabled', false);
+                empr_helper.notify("An error occurred while inserting records.", 2);
+            }
+        });
     },
 }

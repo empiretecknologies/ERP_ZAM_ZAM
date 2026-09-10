@@ -121,5 +121,15 @@ namespace Empire_ERP.Core.Services
         {
             return _itemMasterRepository.DeleteBarcodeInfo(barCodeId, code, common);
         }
+
+        public MyHttpResponseMessage ProcessBulkUpload(List<ItemBulkUploadRow> rows, Common common)
+        {
+            return _itemMasterRepository.ProcessBulkUpload(rows, common);
+        }
+
+        public MyHttpResponseMessage CompleteBulkUpload(List<ItemBulkUploadRow> rows, Common common)
+        {
+            return _itemMasterRepository.CompleteBulkUpload(rows, common);
+        }
     }
 }

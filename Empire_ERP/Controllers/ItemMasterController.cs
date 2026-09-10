@@ -466,5 +466,43 @@ namespace Empire_ERP.Controllers
                 return Json(new { data = _catchMessage, msgType = 2 });
             }
         }
+
+        [HttpPost]
+        public JsonResult ProcessBulkUpload([FromBody] List<ItemBulkUploadRow> rows)
+        {
+            try
+            {
+                var data = _itemMasterService.ProcessBulkUpload(rows, CommonHelper.GetValues(HttpContext));
+                return Json(data);
+            }
+            catch (Exception ex)
+            {
+                string _catchMessage = ex.Message;
+                if (ex.InnerException != null)
+                {
+                    _catchMessage += "<br/>" + ex.InnerException.Message;
+                }
+                return Json(new { msg = _catchMessage, msgType = 2 });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult CompleteBulkUpload([FromBody] List<ItemBulkUploadRow> rows)
+        {
+            try
+            {
+                var data = _itemMasterService.CompleteBulkUpload(rows, CommonHelper.GetValues(HttpContext));
+                return Json(data);
+            }
+            catch (Exception ex)
+            {
+                string _catchMessage = ex.Message;
+                if (ex.InnerException != null)
+                {
+                    _catchMessage += "<br/>" + ex.InnerException.Message;
+                }
+                return Json(new { msg = _catchMessage, msgType = 2 });
+            }
+        }
     }
 }

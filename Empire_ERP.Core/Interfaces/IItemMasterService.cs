@@ -16,5 +16,7 @@ namespace Empire_ERP.Core.Interfaces
         MyHttpResponseMessage SaveAttributeInfo(ItemAttribute itemAttribute, Common common);
         MyHttpResponseMessage GetBarcodeInfoByBarcodeId(int barCodeId, int code, Common common);
         MyHttpResponseMessage DeleteBarcodeInfo(int barCodeId, int code, Common common);
+        MyHttpResponseMessage ProcessBulkUpload(List<ItemBulkUploadRow> rows, Common common);
+        MyHttpResponseMessage CompleteBulkUpload(List<ItemBulkUploadRow> rows, Common common);
     }
 }
