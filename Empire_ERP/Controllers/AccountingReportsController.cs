@@ -27,6 +27,7 @@ namespace Empire_ERP.Controllers
             var currentCompanyResponse = _companyService.GetCompanyByCode(common.Company);
             var currentCompany = (Company)currentCompanyResponse.data;
             ViewBag.CompanyName = currentCompany.C_NAME;
+            ViewBag.MenuId = common.MenuID;
             ViewBag.StartDate = ((Period)periodInfo.data).START_D.Value.ToString("yyyy-MM-dd");
             //ViewBag.EndDate = ((Period)periodInfo.data).CLOSING == 1
             //   ? ((Period)periodInfo.data).START_E.Value.ToString("yyyy-MM-dd")

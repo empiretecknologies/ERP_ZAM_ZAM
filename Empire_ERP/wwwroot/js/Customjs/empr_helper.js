@@ -6,6 +6,7 @@
     selectedBills: [],
     partyTypeCode: [],
     companyName: '',
+    menuId: 0,
     reportName: '',
     fromDate: '',
     toDate: '',
@@ -2450,6 +2451,7 @@
                             From: empr_helper.formatDateTopdf(empr_helper.fromDate),
                             To: empr_helper.formatDateTopdf(empr_helper.toDate),
                             IsLandscape: isLandscape,
+                            MenuId: empr_helper.menuId || null,
                             Grids: requestGrids
                         }),
                         xhrFields: { responseType: 'blob' },
@@ -8646,6 +8648,7 @@
                             From: empr_helper.formatDateTopdf(empr_helper.fromDate),
                             To: empr_helper.formatDateTopdf(empr_helper.toDate),
                             IsLandscape: isLandscape,
+                            MenuId: empr_helper.menuId || null,
                             Grids: requestGrids
                         }),
                         xhrFields: { responseType: 'blob' },

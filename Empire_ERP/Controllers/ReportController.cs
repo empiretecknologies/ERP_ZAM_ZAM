@@ -1,4 +1,9 @@
-﻿using iTextSharp.text;
+﻿using Empire_ERP.Core.Entities;
+using Empire_ERP.Core.Interfaces;
+using Empire_ERP.Core.Services;
+using Empire_ERP.Helpers;
+using Microsoft.Data.SqlClient;
+using iTextSharp.text;
 using iTextSharp.text.pdf;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualBasic;
@@ -16,6 +21,12 @@ namespace Empire_ERP.Controllers
 {
     public class ReportController : Controller
     {
+        public IMenuService _menuService { get; set; }
+
+        public ReportController(IMenuService menuService)
+        {
+            _menuService = menuService;
+        }
 
         [HttpPost]
         [Consumes("application/json")]
@@ -25,6 +36,8 @@ namespace Empire_ERP.Controllers
 
             MemoryStream stream = new MemoryStream();
             Rectangle pageSize = request.IsLandscape ? PageSize.A4.Rotate() : PageSize.A4;
+
+            List<string> cashBankFlowSignatures = GetCashBankFlowSignatures(request);
 
             Document document = new Document(pageSize, 25f, 25f, 65f, 40f);
             PdfWriter writer = PdfWriter.GetInstance(document, stream);
@@ -88,6 +101,11 @@ namespace Empire_ERP.Controllers
 
                 AddGridToPDF(document, grid, themeColor, defaultFont, request.lastDate, request.lastAmount, gridCount);
                 gridCount++;
+            }
+
+            if (cashBankFlowSignatures.Count > 0)
+            {
+                AddCashBankFlowSignatureSection(document, writer, cashBankFlowSignatures, defaultFont, themeColor);
             }
 
             document.Close();
@@ -1048,6 +1066,175 @@ namespace Empire_ERP.Controllers
             return null;
         }
 
+        bool IsCashBankFlowReport(string reportName)
+        {
+            return !string.IsNullOrWhiteSpace(reportName) &&
+                   reportName.IndexOf("Cash & Bank Flow", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        int ResolveMenuId(PDFRequest request)
+        {
+            if (request != null && request.MenuId.HasValue && request.MenuId.Value > 0)
+                return request.MenuId.Value;
+
+            var common = CommonHelper.GetValues(HttpContext);
+            if (common.MenuID > 0)
+                return common.MenuID;
+
+            string referer = Convert.ToString(Request.Headers["Referer"]);
+            if (!string.IsNullOrWhiteSpace(referer))
+            {
+                Uri uri = new Uri(referer);
+                var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+                if (int.TryParse(query["Code"], out int code) && code > 0)
+                    return code;
+            }
+
+            return 0;
+        }
+
+        List<string> GetCashBankFlowSignatures(PDFRequest request)
+        {
+            List<string> signatures = new List<string>();
+            if (!IsCashBankFlowReport(request?.ReportName))
+                return signatures;
+
+            int menuId = ResolveMenuId(request);
+            if (menuId <= 0)
+                return signatures;
+
+            string sig1 = null;
+            string sig2 = null;
+            string sig3 = null;
+            string sig4 = null;
+
+            try
+            {
+                var menuResponse = _menuService.GetMenu(menuId);
+                var menu = menuResponse?.data as Menu;
+                if (menu != null)
+                {
+                    sig1 = menu.MENU_SIG1;
+                    sig2 = menu.MENU_SIG2;
+                    sig3 = menu.MENU_SIG3;
+                    sig4 = menu.MENU_SIG4;
+                }
+            }
+            catch
+            {
+            }
+
+            if (sig1 == null && sig2 == null && sig3 == null && sig4 == null)
+            {
+                using (SqlConnection connection = new SqlConnection(new SQLService().getconnstring()))
+                {
+                    string query = $"SELECT MENU_SIG1, MENU_SIG2, MENU_SIG3, MENU_SIG4 FROM TBL_MENU_BUILDER WHERE ID = {menuId}";
+                    SqlCommand command = new SqlCommand(query, connection);
+                    connection.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        sig1 = reader["MENU_SIG1"] == DBNull.Value ? "" : Convert.ToString(reader["MENU_SIG1"]);
+                        sig2 = reader["MENU_SIG2"] == DBNull.Value ? "" : Convert.ToString(reader["MENU_SIG2"]);
+                        sig3 = reader["MENU_SIG3"] == DBNull.Value ? "" : Convert.ToString(reader["MENU_SIG3"]);
+                        sig4 = reader["MENU_SIG4"] == DBNull.Value ? "" : Convert.ToString(reader["MENU_SIG4"]);
+                    }
+                    reader.Close();
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(sig1)) signatures.Add(sig1.Trim());
+            if (!string.IsNullOrWhiteSpace(sig2)) signatures.Add(sig2.Trim());
+            if (!string.IsNullOrWhiteSpace(sig3)) signatures.Add(sig3.Trim());
+            if (!string.IsNullOrWhiteSpace(sig4)) signatures.Add(sig4.Trim());
+
+            return signatures;
+        }
+
+        void AddCashBankFlowSignatureSection(Document document, PdfWriter writer, List<string> signatures, Font defaultFont, BaseColor themeColor)
+        {
+            if (signatures == null || signatures.Count == 0)
+                return;
+
+            int count = signatures.Count;
+            int cols = count == 1 ? 1 : (count * 2) - 1;
+            float availableWidth = document.PageSize.Width - document.LeftMargin - document.RightMargin;
+
+            PdfPTable table = new PdfPTable(cols);
+            table.TotalWidth = availableWidth;
+            table.LockedWidth = true;
+            table.KeepTogether = true;
+            table.SplitLate = false;
+            table.SplitRows = false;
+
+            if (cols > 1)
+            {
+                float[] widths = new float[cols];
+                for (int i = 0; i < cols; i++)
+                    widths[i] = (i % 2 == 0) ? 4f : 0.8f;
+                table.SetWidths(widths);
+            }
+
+            BaseFont bf = BaseFont.CreateFont(@"C:\Windows\Fonts\arial.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+            Font signFont = new Font(bf, 8, Font.NORMAL, themeColor);
+
+            PdfPCell spacerCell()
+            {
+                return new PdfPCell(new Phrase(" "))
+                {
+                    Border = Rectangle.NO_BORDER
+                };
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                table.AddCell(new PdfPCell(new Phrase(" "))
+                {
+                    Border = Rectangle.BOTTOM_BORDER,
+                    BorderColor = themeColor,
+                    BorderWidth = 0.8f,
+                    FixedHeight = 40f
+                });
+                if (i < count - 1)
+                    table.AddCell(spacerCell());
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                table.AddCell(new PdfPCell(new Phrase(signatures[i], signFont))
+                {
+                    Border = Rectangle.NO_BORDER,
+                    HorizontalAlignment = Element.ALIGN_CENTER,
+                    PaddingTop = 6f,
+                    PaddingBottom = 4f
+                });
+                if (i < count - 1)
+                    table.AddCell(spacerCell());
+            }
+
+            float tableHeight = table.TotalHeight;
+            float currentY = writer.GetVerticalPosition(false);
+            float gap = currentY - document.BottomMargin - tableHeight - 8f;
+
+            if (gap > 20f)
+            {
+                PdfPTable spacer = new PdfPTable(1);
+                spacer.TotalWidth = availableWidth;
+                spacer.LockedWidth = true;
+                spacer.AddCell(new PdfPCell(new Phrase(" "))
+                {
+                    Border = Rectangle.NO_BORDER,
+                    FixedHeight = gap
+                });
+                document.Add(spacer);
+            }
+            else
+            {
+                table.SpacingBefore = 24f;
+            }
+
+            document.Add(table);
+        }
 
     }
 
@@ -1245,5 +1432,6 @@ namespace Empire_ERP.Controllers
         public string? From { get; set; }
         public string? To { get; set; }
         public string? Size { get; set; }
+        public int? MenuId { get; set; }
     }
 }

@@ -94,6 +94,7 @@
     <script src="~/js/customjs/empr_AccountingReports.js" asp-append-version="true"></script>
     <script type="text/javascript">
         empr_helper.companyName = @Html.Raw(Json.Serialize(ViewBag.CompanyName));
+        empr_helper.menuId = @Html.Raw(Json.Serialize(ViewBag.MenuId));
         $(function () {
             empr_AccountingReports.InitEvents();
         });
