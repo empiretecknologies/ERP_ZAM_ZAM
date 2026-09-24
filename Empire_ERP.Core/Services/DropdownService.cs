@@ -2637,6 +2637,7 @@ namespace Empire_ERP.Core.Services
                                     SELECT 
                                     M.ITEM_CODE, 
                                     M.ITEM_NAME,
+M.RETAIL_RATE,
                                     M.BARCODE,
                                     M.IPIC,
                                     M.GROUP_CODE,
@@ -2675,6 +2676,7 @@ namespace Empire_ERP.Core.Services
                                     M.ITEM_CODE, 
                                     M.ITEM_ID, 
                                     M.ITEM_NAME, 
+M.RETAIL_RATE,
                                     M.BARCODE,
                                     M.IPIC,
                                     M.GROUP_CODE,
@@ -2691,6 +2693,7 @@ namespace Empire_ERP.Core.Services
                                     SELECT  
                                     M.ITEM_CODE, 
                                     M.ITEM_NAME,
+M.RETAIL_RATE,
                                     M.BARCODE,
                                     M.IPIC,
                                     M.GROUP_CODE,
@@ -2716,6 +2719,7 @@ namespace Empire_ERP.Core.Services
                                     SELECT  
                                     M.ITEM_CODE, 
                                     M.ITEM_NAME,
+M.RETAIL_RATE,
                                     M.BARCODE,
                                     M.IPIC,
                                     M.GROUP_CODE,
@@ -2767,6 +2771,7 @@ namespace Empire_ERP.Core.Services
                                 string pack = (reader["PACK"] == DBNull.Value) ? "" : Convert.ToString(reader["PACK"]);
                                 double tax = (reader["SALESTAX"] == DBNull.Value) ? 0.0 : Convert.ToDouble(reader["SALESTAX"]);
                                 double rate = (reader["SALE_RATE"] == DBNull.Value) ? 0.0 : Convert.ToDouble(reader["SALE_RATE"]);
+                                double rRate = (reader["RETAIL_RATE"] == DBNull.Value) ? 0.0 : Convert.ToDouble(reader["RETAIL_RATE"]);
                                 int? partyCode = new int?((reader["PARTY_CODE"] == DBNull.Value) ? 0 : Convert.ToInt32(reader["PARTY_CODE"]));
                                 int? accountCode = new int?((reader["ACT_CODE"] == DBNull.Value) ? 0 : Convert.ToInt32(reader["ACT_CODE"]));
                                 string? barcode = reader.IsDBNull(3) ? "" : Convert.ToString(reader["BARCODE"]);
@@ -2780,6 +2785,7 @@ namespace Empire_ERP.Core.Services
                                     ITEM_CODE = code,
                                     value = name,
                                     rate = rate,
+                                    rRate = rRate,
                                     hscode = hscode,
                                     unit = unit,
                                     saleTax = tax,

@@ -362,58 +362,138 @@ var empr_CustomerPricing = {
         }
     },
 
+    //DeleteRow: function (index, dtCode) {
+    //    debugger;
+    //    const gridInstance = $('#DetailContainer').dxDataGrid('instance');
+    //    var dataSource = gridInstance.option("dataSource") || [];
+
+    //    if (dataSource.length === 0) return;
+
+    //    if (dataSource.length === 1) {
+    //        if (dtCode) {
+    //            empr_helper.notify("You are not allowed to delete the last row.", 2);
+    //        } else {
+    //            empr_CustomerPricing.CreateGrid([{ __KEY__: empr_CustomerPricing.GenerateKey(36), dC_TYPE: empr_CustomerPricing.DC_TYPE }]);
+    //            empr_helper.notify("You are not allowed to delete the last row.", 2);
+    //        }
+    //        return;
+    //    }
+
+    //    if (!dtCode) {
+    //        dataSource.splice(index, 1);
+    //        gridInstance.option("dataSource", dataSource);
+    //        empr_CustomerPricing.rowsCount -= 1;
+    //        return;
+    //    }
+
+    //    var availableRows = dataSource.filter(function (x) { return x.dT_CODE > 0; });
+    //    if (availableRows.length <= 1) {
+    //        empr_helper.notify("You are not allowed to delete the last row.", 2);
+    //        return;
+    //    }
+
+    //    swal({
+    //        title: 'Are you sure you want to remove this record?',
+    //        text: "You won't be able to revert this!",
+    //        type: 'warning',
+    //        showCancelButton: true,
+    //        confirmButtonColor: '#0CC27E',
+    //        cancelButtonColor: '#FF586B',
+    //        confirmButtonText: 'Yes, delete it!',
+    //        cancelButtonText: 'No, cancel!',
+    //        confirmButtonClass: 'btn btn-success mr-5',
+    //        cancelButtonClass: 'btn btn-danger',
+    //        buttonsStyling: false
+    //    }).then(function () {
+    //        ajaxHelper.ajaxPostJsonData({ gcode: $('#Code').val(), code: dtCode }, "/CustomerPricing/DeleteCommisionMapDetailByCode", function (data) {
+    //            empr_helper.notify(data.msg, data.msgType);
+    //            if (data.msgType == 1) {
+    //                var ds = gridInstance.option("dataSource") || [];
+    //                ds.splice(index, 1);
+    //                gridInstance.option("dataSource", ds);
+    //                empr_CustomerPricing.rowsCount -= 1;
+    //            }
+    //        }, false, true);
+    //    });
+    //},
     DeleteRow: function (index, dtCode) {
+        //debugger;
         const gridInstance = $('#DetailContainer').dxDataGrid('instance');
-        var dataSource = gridInstance.option("dataSource") || [];
-
-        if (dataSource.length === 0) return;
-
-        if (dataSource.length === 1) {
-            if (dtCode) {
-                empr_helper.notify("You are not allowed to delete the last row.", 2);
-            } else {
-                empr_CustomerPricing.CreateGrid([{ __KEY__: empr_CustomerPricing.GenerateKey(36), dC_TYPE: empr_CustomerPricing.DC_TYPE }]);
-                empr_helper.notify("You are not allowed to delete the last row.", 2);
-            }
-            return;
-        }
-
-        if (!dtCode) {
-            dataSource.splice(index, 1);
-            gridInstance.option("dataSource", dataSource);
-            empr_CustomerPricing.rowsCount -= 1;
-            return;
-        }
-
-        var availableRows = dataSource.filter(function (x) { return x.dT_CODE > 0; });
-        if (availableRows.length <= 1) {
-            empr_helper.notify("You are not allowed to delete the last row.", 2);
-            return;
-        }
-
-        swal({
-            title: 'Are you sure you want to remove this record?',
-            text: "You won't be able to revert this!",
-            type: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#0CC27E',
-            cancelButtonColor: '#FF586B',
-            confirmButtonText: 'Yes, delete it!',
-            cancelButtonText: 'No, cancel!',
-            confirmButtonClass: 'btn btn-success mr-5',
-            cancelButtonClass: 'btn btn-danger',
-            buttonsStyling: false
-        }).then(function () {
-            ajaxHelper.ajaxPostJsonData({ gcode: $('#Code').val(), code: dtCode }, "/CustomerPricing/DeleteCommisionMapDetailByCode", function (data) {
-                empr_helper.notify(data.msg, data.msgType);
-                if (data.msgType == 1) {
-                    var ds = gridInstance.option("dataSource") || [];
-                    ds.splice(index, 1);
-                    gridInstance.option("dataSource", ds);
+        var dataSource = gridInstance.option("dataSource");
+        console.log("datasourcesss", dataSource);
+        if (dataSource.length > 0) {
+            if (dataSource.length > 1) {
+                var row = dataSource[index];
+                if (dtCode == '' || dtCode == null || dtCode == undefined) {
+                    gridInstance.deleteRow(index);
                     empr_CustomerPricing.rowsCount -= 1;
+                    gridInstance.saveEditData();
                 }
-            }, false, true);
-        });
+                else {
+                    var availableRows = dataSource.filter(x => x.dT_CODE > 0);
+                    if (availableRows.length > 1) {
+                        swal({
+                            title: 'Are you sure you want to remove this record?',
+                            text: "You won't be able to revert this!",
+                            type: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#0CC27E',
+                            cancelButtonColor: '#FF586B',
+                            confirmButtonText: 'Yes, delete it!',
+                            cancelButtonText: 'No, cancel!',
+                            confirmButtonClass: 'btn btn-success mr-5',
+                            cancelButtonClass: 'btn btn-danger',
+                            buttonsStyling: false
+                        }).then(function () {
+                            //debugger;
+                            ajaxHelper.ajaxPostJsonData({ gcode: $('#Code').val(), code: dtCode }, "/CustomerPricing/DeleteCommisionMapDetailByCode", function (data) {
+                                empr_helper.notify(data.msg, data.msgType);
+                                if (data.msgType == 1) {
+                                    gridInstance.deleteRow(index);
+                                    empr_CustomerPricing.rowsCount -= 1;
+                                    gridInstance.saveEditData();
+                                }
+                            }, false, true);
+                        });
+                    } else {
+                        empr_helper.notify("You are not allowed to delete the last row.", 2);
+                    }
+                }
+            }
+            else {
+                var row = dataSource[index];
+                if (dtCode != '' && dtCode != null && dtCode != undefined) {
+                    var availableRows = dataSource.filter(x => x.dT_CODE > 0);
+                    if (availableRows.length > 1) {
+                        swal({
+                            title: 'Are you sure you want to remove this record?',
+                            text: "You won't be able to revert this!",
+                            type: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#0CC27E',
+                            cancelButtonColor: '#FF586B',
+                            confirmButtonText: 'Yes, delete it!',
+                            cancelButtonText: 'No, cancel!',
+                            confirmButtonClass: 'btn btn-success mr-5',
+                            cancelButtonClass: 'btn btn-danger',
+                            buttonsStyling: false
+                        }).then(function () {
+                            ajaxHelper.ajaxPostJsonData({ gcode: $('#Code').val(), code: dtCode }, "/CommMap/DeleteCommisionMapDetailByCode", function (data) {
+                                empr_helper.notify(data.msg, data.msgType);
+                                if (data.msgType == 1) {
+                                    empr_CustomerPricing.CreateGrid([{ __KEY__: empr_CustomerPricing.GenerateKey(36), dC_TYPE: empr_CustomerPricing.DC_TYPE }]);
+                                }
+                            }, false, true);
+                        });
+                    } else {
+                        empr_helper.notify("You are not allowed to delete the last row.", 2);
+                    }
+                } else {
+                    empr_CustomerPricing.CreateGrid([{ __KEY__: empr_CustomerPricing.GenerateKey(36), dC_TYPE: empr_CustomerPricing.DC_TYPE }]);
+                    empr_helper.notify("You are not allowed to delete the last row.", 2);
+                }
+            }
+        }
     },
 
     GenerateKey: function (keyLength) {

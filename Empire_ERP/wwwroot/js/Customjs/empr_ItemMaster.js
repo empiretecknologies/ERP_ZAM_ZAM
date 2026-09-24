@@ -759,6 +759,7 @@ var empr_ItemMaster = {
                 $("#REMARKS").val(response.remarks)
                 $("#PACK").val(response.pack)
                 $("#SALE_RATE").val(response.salE_RATE)
+                $("#RETAIL_RATE").val(response.retaiL_RATE)
                 $("#PURCHASE_RATE").val(response.purchasE_RATE)
                 $("#SALESTAX").val(response.salestax)
                 $("#ITEM_MAX").val(response.iteM_MAX)
@@ -1195,6 +1196,7 @@ var empr_ItemMaster = {
         var BITYPE = $("#BITYPE").dxSelectBox('instance').option('value');
         var BARCODE = $("#BARCODE").val();
         var SALE_RATE = $("#SALE_RATE").val();
+        var RETAIL_RATE = $("#RETAIL_RATE").val();
         var PURCHASE_RATE = $("#PURCHASE_RATE").val();
         var SALESTAX = $("#SALESTAX").val();
         var ITEM_MAX = $("#ITEM_MAX").val();
@@ -1218,6 +1220,7 @@ var empr_ItemMaster = {
             PACK: PACK,
             PUNIT_CODE: PUNIT_CODE,
             SALE_RATE: SALE_RATE,
+            RETAIL_RATE: RETAIL_RATE,
             PURCHASE_RATE: PURCHASE_RATE,
             SALESTAX: SALESTAX,
             ITAX_STATUS: ITAX_STATUS,
@@ -1430,6 +1433,7 @@ var empr_ItemMaster = {
         $("#REMARKS").val('');
         $("#PACK").val('');
         $("#SALE_RATE").val('');
+        $("#RETAIL_RATE").val('');
         $("#PURCHASE_RATE").val('');
         $("#SALESTAX").val('');
         $("#ITEM_MAX").val('');

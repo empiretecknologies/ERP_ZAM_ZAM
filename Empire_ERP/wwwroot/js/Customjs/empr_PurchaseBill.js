@@ -116,7 +116,7 @@ var empr_PurchaseBill = {
             });
 
             $('body').on('change', '#DISC_RATE, #DISC', function () {
-                var changedId = $(this).attr('id'); 
+                var changedId = $(this).attr('id');
 
                 empr_PurchaseBill.SetDiscount(changedId);
             });
@@ -399,14 +399,14 @@ var empr_PurchaseBill = {
             var netAmt = gridAmtSum - DISC;
             $('#NetAmount').val(netAmt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
         } else if (changedId === 'GRID') {
-            var calculatedDisc = (gridAmtSum * DISC_RATE) / 100;
+            var calculatedDisc = Math.round((gridAmtSum * DISC_RATE) / 100);
             $('#DISC').val(calculatedDisc.toFixed(2));
             var netAmt = gridAmtSum - calculatedDisc;
             $('#NetAmount').val(netAmt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
         }
     },
 
-    processBarcode: async function () { 
+    processBarcode: async function () {
         debugger;
         var inputVal = $("#BARCODE").val().trim();
         if (inputVal === "") return;
@@ -1390,7 +1390,7 @@ var empr_PurchaseBill = {
                         var $eyeContainer = $('.dx-edit-row .eye-container-marker');
 
                         if (selectedItem && selectedItem.image) {
-                            newData.doc = selectedItem.image; 
+                            newData.doc = selectedItem.image;
 
                             var eyeHtml = `<a href="javascript:;" class="grid-action-icon ViewImage" style="margin-left: 8px" onclick="ShowImage('${selectedItem.image}')" title="View Pic"><i class="fa fa-eye"></i></a>`;
 
@@ -2294,7 +2294,16 @@ var empr_PurchaseBill = {
                     qty = parseInt(currentRowData.qty, 10) || 0;
                 }
 
-                rowData.rate = selectedItem.rate;
+                var pcode = $('#partyhidden').val();
+                var acode = $('#acthidden').val();
+
+                if (pcode == 164 && acode == 13) {
+                    rowData.rate = selectedItem.rRate;
+                }
+                else {
+                    rowData.rate = selectedItem.rate;
+
+                }
                 rowData.amt = rate * qty;
                 rowData.hS_CODE = selectedItem.hscode;
             }
@@ -3437,7 +3446,7 @@ var empr_PurchaseBill = {
             if (code) {
 
                 ajaxHelper.ajaxGetJson('/PurchaseBill/GetPartyCurrentBalance?vDate=' + empr_PurchaseBill.vDate + '&partyCode=' + filteredData[0].partyCode + '&accountCode=' + filteredData[0].accountCode, function (data) {
-                    
+
                     if (data.length > 0) {
                         var newPartyData = $.grep(data, function (item) {
                             return item.key === d.value;
@@ -3496,7 +3505,7 @@ var empr_PurchaseBill = {
                     }
                 });
 
-                grid.refresh();  
+                grid.refresh();
             } else {
                 empr_helper.notify(data.msg, data.msgType);
             }

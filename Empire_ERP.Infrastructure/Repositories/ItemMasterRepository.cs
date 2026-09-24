@@ -222,7 +222,7 @@ namespace Empire_ERP.Infrastructure.Repositories
                                 var newItemCode = GenerateNextId(common);
                                 query = "INSERT INTO " + table + " " +
                                         "(ITEM_CODE,ITEM_ID,ITEM_NAME,ITEM_SHORT_NAME,BARCODE_TYPE,BARCODE," +
-                                        "REMARKS,GROUP_CODE,IUNIT_CODE,PACK,PUNIT_CODE,SALE_RATE," +
+                                        "REMARKS,GROUP_CODE,IUNIT_CODE,PACK,PUNIT_CODE,SALE_RATE,RETAIL_RATE," +
                                         "PURCHASE_RATE,SALESTAX,ITAX_STATUS,ITEM_MAX,ITEM_MINI,IPIC," +
                                         "ASTATUS,ADD_DATE,ADD_COMPUTER_NAME,ADD_IP_ADDRESS," +
                                         "EDIT_USER_ID,EDIT_DATE,EDIT_COMPUTER_NAME,EDIT_IP_ADDRESS," +
@@ -230,7 +230,7 @@ namespace Empire_ERP.Infrastructure.Repositories
                                         "ADD_USER_ID,DLT,GRADE,ITEM_TYPE, CAT_CODE, SUB_CAT_CODE,HS_CODE)" +
                                         "VALUES" +
                                         "('" + newItemCode + "','" + modelRecord.ITEM_ID + "','" + modelRecord.ITEM_NAME + "','" + modelRecord.ITEM_SHORT_NAME + "','" + modelRecord.BITYPE + "','" + modelRecord.BARCODE + "'," +
-                                        "'" + modelRecord.REMARKS + "','" + modelRecord.GROUP_CODE + "','" + modelRecord.IUNIT_CODE + "','" + modelRecord.PACK + "','" + modelRecord.PUNIT_CODE + "','" + modelRecord.SALE_RATE + "'," +
+                                        "'" + modelRecord.REMARKS + "','" + modelRecord.GROUP_CODE + "','" + modelRecord.IUNIT_CODE + "','" + modelRecord.PACK + "','" + modelRecord.PUNIT_CODE + "','" + modelRecord.SALE_RATE + "','" + modelRecord.RETAIL_RATE + "'," +
                                         "'" + modelRecord.PURCHASE_RATE + "','" + modelRecord.SALESTAX + "','" + modelRecord.ITAX_STATUS + "','" + modelRecord.ITEM_MAX + "','" + modelRecord.ITEM_MIN + "','" + modelRecord.IPIC + "'," +
                                         "'" + modelRecord.ASTATUS + "','" + CommonService.GetDateTime("Pakistan Standard Time") + "','" + Computer + "','" + Ip + "'," +
                                         "'" + common.Username + "','" + CommonService.GetDateTime("Pakistan Standard Time") + "','" + Computer + "','" + Ip + "'," +
@@ -291,6 +291,7 @@ namespace Empire_ERP.Infrastructure.Repositories
                                             HS_CODE = '" + modelRecord.HS_CODE + @"',
                                             PUNIT_CODE = '" + modelRecord.PUNIT_CODE + @"',
                                             SALE_RATE = '" + modelRecord.SALE_RATE + @"',
+                                            RETAIL_RATE = '" + modelRecord.RETAIL_RATE + @"',
                                             PURCHASE_RATE = '" + modelRecord.PURCHASE_RATE + @"',
                                             SALESTAX = '" + modelRecord.SALESTAX + @"',
                                             ITAX_STATUS = '" + modelRecord.ITAX_STATUS + @"',
@@ -872,7 +873,7 @@ namespace Empire_ERP.Infrastructure.Repositories
                         //                LEFT OUTER JOIN TBL_ITEM_ATT AI ON AI.ITEM_CODE = IT.ITEM_CODE AND AI.DLT = 'T'
                         //                WHERE IT.DLT = 'T' AND IT.ITEM_CODE = '{code}'";
 
-                        string query = $@"SELECT IT.HS_CODE,IT.BARCODE_TYPE,IT.BARCODE, IT.ITEM_CODE,IT.ITEM_ID,IT.ITEM_NAME,IT.ITEM_SHORT_NAME,IT.REMARKS,IT.GROUP_CODE,IT.IUNIT_CODE,IT.PACK,IT.PUNIT_CODE,IT.SALE_RATE,
+                        string query = $@"SELECT IT.HS_CODE,IT.BARCODE_TYPE,IT.BARCODE, IT.ITEM_CODE,IT.ITEM_ID,IT.ITEM_NAME,IT.ITEM_SHORT_NAME,IT.REMARKS,IT.GROUP_CODE,IT.IUNIT_CODE,IT.PACK,IT.PUNIT_CODE,IT.SALE_RATE,IT.RETAIL_RATE,
                                         IT.PURCHASE_RATE,IT.SALESTAX,IT.ITAX_STATUS,
                                         IT.ITEM_MAX,IT.ITEM_MINI,IT.IPIC,IT.GRADE,IT.ASTATUS,IT.ITEM_TYPE,
 										CAT_CODE, SUB_CAT_CODE, GRADE, FABRIC, SEASON, STYLE
@@ -898,6 +899,7 @@ namespace Empire_ERP.Infrastructure.Repositories
                                 PACK = Convert.ToString(reader["PACK"]),
                                 PUNIT_CODE = reader["PUNIT_CODE"] == DBNull.Value ? 0 : Convert.ToInt32(reader["PUNIT_CODE"]),
                                 SALE_RATE = reader["SALE_RATE"] == DBNull.Value ? 0 : Convert.ToDouble(reader["SALE_RATE"]),
+                                RETAIL_RATE = reader["RETAIL_RATE"] == DBNull.Value ? 0 : Convert.ToDouble(reader["RETAIL_RATE"]),
                                 PURCHASE_RATE = reader["PURCHASE_RATE"] == DBNull.Value ? 0 : Convert.ToDouble(reader["PURCHASE_RATE"]),
                                 SALESTAX = reader["SALESTAX"] == DBNull.Value ? 0 : Convert.ToDouble(reader["SALESTAX"]),
                                 ITAX_STATUS = reader["ITAX_STATUS"] == DBNull.Value ? 0 : Convert.ToInt32(reader["ITAX_STATUS"]),
