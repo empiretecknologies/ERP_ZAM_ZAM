@@ -75,13 +75,13 @@
                   <Width>0.46748in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>0.87348in</Width>
+                  <Width>1.1178in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>2.81773in</Width>
+                  <Width>2.69273in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>1.48043in</Width>
+                  <Width>1.31966in</Width>
                 </TablixColumn>
                 <TablixColumn>
                   <Width>0.74709in</Width>
@@ -457,7 +457,7 @@
                                 </TextRun>
                               </TextRuns>
                               <Style>
-                                <TextAlign>Center</TextAlign>
+                                <TextAlign>Left</TextAlign>
                               </Style>
                             </Paragraph>
                           </Paragraphs>
@@ -468,7 +468,7 @@
                               <Style>Solid</Style>
                             </Border>
                             <VerticalAlign>Middle</VerticalAlign>
-                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingLeft>4pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
                             <PaddingTop>2pt</PaddingTop>
                             <PaddingBottom>2pt</PaddingBottom>
@@ -941,7 +941,7 @@
             <Top>0.06944in</Top>
             <Left>0.14011in</Left>
             <Height>0.75in</Height>
-            <Width>8.00361in</Width>
+            <Width>7.96216in</Width>
             <Style>
               <Border>
                 <Style>None</Style>

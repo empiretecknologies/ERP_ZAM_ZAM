@@ -2461,7 +2461,8 @@ namespace Empire_ERP.Infrastructure.Repositories
                              ON BGC.GROUP_CODE = BG.COLOR
                              WHERE B.BCODE = '{common.Branch}' And B.PERIOD_ID = '{common.Period}' AND B.TRAN_ID = '{modelRecord.TRAN_ID}' 
                             AND B.DLT = 'T' 
-                            Group By E.ITEM_ID,E.ITEM_NAME, E.REMARKS,B.DT_DESC";
+                            Group By E.ITEM_ID,E.ITEM_NAME, E.REMARKS,B.DT_DESC, B.DT_CODE 
+                            ORDER BY B.DT_CODE ";
                 }
                 else if (menuDetails.MD_ID == 21)
                 {

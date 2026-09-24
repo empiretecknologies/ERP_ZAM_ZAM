@@ -392,17 +392,17 @@ var empr_PurchaseBill = {
             var calculatedDisc = (gridAmtSum * DISC_RATE) / 100;
             $('#DISC').val(calculatedDisc.toFixed(2));
             var netAmt = gridAmtSum - calculatedDisc;
-            $('#NetAmount').val(netAmt.toFixed(2));
+            $('#NetAmount').val(netAmt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
         } else if (changedId === 'DISC') {
             var calculatedRate = (DISC / gridAmtSum) * 100;
             $('#DISC_RATE').val(calculatedRate.toFixed(2));
             var netAmt = gridAmtSum - DISC;
-            $('#NetAmount').val(netAmt.toFixed(2));
+            $('#NetAmount').val(netAmt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
         } else if (changedId === 'GRID') {
             var calculatedDisc = (gridAmtSum * DISC_RATE) / 100;
             $('#DISC').val(calculatedDisc.toFixed(2));
             var netAmt = gridAmtSum - calculatedDisc;
-            $('#NetAmount').val(netAmt.toFixed(2));
+            $('#NetAmount').val(netAmt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
         }
     },
 

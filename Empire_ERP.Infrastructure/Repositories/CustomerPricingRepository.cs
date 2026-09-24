@@ -178,37 +178,37 @@ namespace Empire_ERP.Infrastructure.Repositories
                                 if (item.GROUP_CODE == null || item.GROUP_CODE == 0)
                                 {
                                     IsNew = true;
-                                    if (!(item.PARTY == lastParty && item.ACT_CODE == lastAct))
-                                    {
-                                        string checkQuery = @$"SELECT COUNT(*) FROM {table} 
-                                                             WHERE PARTY_CODE = '{item.PARTY}'
-                                                             AND ACT_CODE = '{item.ACT_CODE}'
-                                                             AND DLT = 'T'";
-                                        command.CommandText = checkQuery;
-                                        int existingCounts = (int)command.ExecuteScalar();
+                                    //if (!(item.PARTY == lastParty && item.ACT_CODE == lastAct))
+                                    //{
+                                    //    string checkQuery = @$"SELECT COUNT(*) FROM {table} 
+                                    //                         WHERE PARTY_CODE = '{item.PARTY}'
+                                    //                         AND ACT_CODE = '{item.ACT_CODE}'
+                                    //                         AND DLT = 'T'";
+                                    //    command.CommandText = checkQuery;
+                                    //    int existingCounts = (int)command.ExecuteScalar();
 
-                                        if (existingCounts > 0)
-                                        {
-                                            response.msg = "Party Already Exist please Select Another One!";
-                                            response.msgType = 2;
-                                            return response;
-                                        }
+                                    //    if (existingCounts > 0)
+                                    //    {
+                                    //        response.msg = "Party Already Exist please Select Another One!";
+                                    //        response.msgType = 2;
+                                    //        return response;
+                                    //    }
 
-                                        lastParty = item.PARTY;
-                                        lastAct = item.ACT_CODE;
-                                    }
+                                    //    lastParty = item.PARTY;
+                                    //    lastAct = item.ACT_CODE;
+                                    //}
 
 
-                                    string checkQuerys = $"SELECT COUNT(*) FROM {table} WHERE PARTY_CODE = '{item.PARTY}' AND ACT_CODE = '{item.ACT_CODE}' AND ITEM_CODE = '{item.ITEM_CODE}' AND DLT = 'T'";
-                                    command.CommandText = checkQuerys;
-                                    int existingCount = (int)command.ExecuteScalar();
+                                    //string checkQuerys = $"SELECT COUNT(*) FROM {table} WHERE PARTY_CODE = '{item.PARTY}' AND ACT_CODE = '{item.ACT_CODE}' AND ITEM_CODE = '{item.ITEM_CODE}' AND DLT = 'T'";
+                                    //command.CommandText = checkQuerys;
+                                    //int existingCount = (int)command.ExecuteScalar();
 
-                                    if (existingCount > 0)
-                                    {
-                                        response.msg = "This item is already assigned to this Party";
-                                        response.msgType = 2;
-                                        return response;
-                                    }
+                                    //if (existingCount > 0)
+                                    //{
+                                    //    response.msg = "This item is already assigned to this Party";
+                                    //    response.msgType = 2;
+                                    //    return response;
+                                    //}
 
                                     if (code == 0)
                                     {
@@ -252,15 +252,15 @@ namespace Empire_ERP.Infrastructure.Repositories
 
                                     if (item.DT_CODE == null || item.DT_CODE == 0)
                                     {
-                                        string checkQuerys = @$"SELECT COUNT(*) FROM {table} WHERE PARTY_CODE = '{item.PARTY}' 
-                                                             AND ACT_CODE = '{item.ACT_CODE}' AND ITEM_CODE = '{item.ITEM_CODE}' AND GROUP_CODE='{item.GROUP_CODE}' AND DLT = 'T'";
-                                        command.CommandText = checkQuerys;
-                                        int existingCount = (int)command.ExecuteScalar();
+                                        //string checkQuerys = @$"SELECT COUNT(*) FROM {table} WHERE PARTY_CODE = '{item.PARTY}' 
+                                        //                     AND ACT_CODE = '{item.ACT_CODE}' AND ITEM_CODE = '{item.ITEM_CODE}' AND GROUP_CODE='{item.GROUP_CODE}' AND DLT = 'T'";
+                                        //command.CommandText = checkQuerys;
+                                        //int existingCount = (int)command.ExecuteScalar();
 
-                                        if (existingCount > 0)
-                                        {
-                                            throw new Exception("This item is already assigned to this Party");
-                                        }
+                                        //if (existingCount > 0)
+                                        //{
+                                        //    throw new Exception("This item is already assigned to this Party");
+                                        //}
                                         dt_code = GenerateNextDetailId(command, menu);
                                         query = $"INSERT INTO {table} " +
                                               "(GROUP_CODE, PARTY_CODE, ACT_CODE, ITEM_CODE, RATE, " +
@@ -286,18 +286,18 @@ namespace Empire_ERP.Infrastructure.Repositories
                                         command.CommandText = query2;
                                         command.ExecuteNonQuery();
 
-                                        if (!isInserted)
-                                        {
-                                            string checkQuery = $@"SELECT COUNT(*) FROM {table} WHERE PARTY_CODE = '{item.PARTY}' AND ACT_CODE='{item.ACT_CODE}' AND ITEM_CODE = '{item.ITEM_CODE}' AND DLT = 'T'
-                                                        AND NOT (GROUP_CODE = '{item.GROUP_CODE}' AND DT_CODE = '{item.DT_CODE}')";
-                                            command.CommandText = checkQuery;
-                                            int existingCount = (int)command.ExecuteScalar();
+                                        //if (!isInserted)
+                                        //{
+                                        //    string checkQuery = $@"SELECT COUNT(*) FROM {table} WHERE PARTY_CODE = '{item.PARTY}' AND ACT_CODE='{item.ACT_CODE}' AND ITEM_CODE = '{item.ITEM_CODE}' AND DLT = 'T'
+                                        //                AND NOT (GROUP_CODE = '{item.GROUP_CODE}' AND DT_CODE = '{item.DT_CODE}')";
+                                        //    command.CommandText = checkQuery;
+                                        //    int existingCount = (int)command.ExecuteScalar();
 
-                                            if (existingCount > 0)
-                                            {
-                                                throw new Exception("This item is already assigned to this Party");
-                                            }
-                                        }
+                                        //    if (existingCount > 0)
+                                        //    {
+                                        //        throw new Exception("This item is already assigned to this Party");
+                                        //    }
+                                        //}
 
                                         query = $"UPDATE {table} SET " +
                                                  $"PARTY_CODE = '{item.PARTY}', " +
