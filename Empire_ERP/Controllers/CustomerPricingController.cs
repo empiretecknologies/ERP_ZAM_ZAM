@@ -139,7 +139,7 @@ namespace Empire_ERP.Controllers
         }
 
         [HttpGet]
-        public JsonResult GetCommisionMaprDetailsByCode(int code)
+        public JsonResult GetCommisionMapDetailsByCode(int code)
         {
             try
             {
@@ -155,6 +155,13 @@ namespace Empire_ERP.Controllers
                 }
                 return Json(new { msg = _catchMessage, msgType = 2 });
             }
+        }
+
+        /// <summary>Legacy typo alias kept for any old callers.</summary>
+        [HttpGet]
+        public JsonResult GetCommisionMaprDetailsByCode(int code)
+        {
+            return GetCommisionMapDetailsByCode(code);
         }
 
         [HttpPost]
