@@ -1467,9 +1467,9 @@ var empr_PurchaseBill = {
                             newData.baL_QTY = qty;
                         }
                         if (!isNaN(rate)) {
-                            newData.amt = (newData.baL_QTY * rate).toFixed(2);
+                            var Amount = (newData.baL_QTY * rate).toFixed(2);
+                            newData.amt = Math.round(Amount);
 
-                            var Amount = newData.amt;
                             var Dis = parseFloat(currentRowData.disc) || 0;
                             var disSum = Amount * Dis / 100 || 0;
                             var Adv = parseFloat(currentRowData.adv) || 0;
@@ -1480,13 +1480,13 @@ var empr_PurchaseBill = {
                             var TaxSum = TaxAmount * Tax / 100 || 0;
                             var AdvSum = (TaxAmount + TaxSum) * Adv / 100 || 0;
 
-                            newData.disC_AMT = disSum.toFixed(2);
-                            newData.taX_AMT = TaxSum.toFixed(2);
+                            newData.disC_AMT = Math.round(disSum);
+                            newData.taX_AMT = Math.round(TaxSum);
                             newData.adV_AMT = AdvSum.toFixed(2);
 
                             var NetAmount = Amount - DiscountAmount || 0;
                             if (!isNaN(NetAmount) && !isNaN(TaxSum) && !isNaN(AdvSum)) {
-                                newData.neT_AMT = (NetAmount + TaxSum + AdvSum).toFixed(2);
+                                newData.neT_AMT = Math.round(NetAmount + TaxSum + AdvSum);
                             } else {
                                 newData.neT_AMT = 0;
                             }
@@ -1562,6 +1562,7 @@ var empr_PurchaseBill = {
                             }
 
                             var Amount = newData.amt || 0;
+                            newData.amt = Math.round(Amount);
                             var Discount = parseFloat(currentRowData.disc) || 0;
                             var Tax = parseFloat(currentRowData.tax) || 0;
                             var Adv = parseFloat(currentRowData.adv) || 0;
@@ -1571,7 +1572,7 @@ var empr_PurchaseBill = {
                             var AdvSum = (TaxAmount + TaxSum) * Adv / 100 || 0
                             var NetAmount = Amount - DiscountAmount || 0;
                             if (!isNaN(NetAmount) && !isNaN(TaxSum) && !isNaN(AdvSum)) {
-                                newData.neT_AMT = (NetAmount + TaxSum + AdvSum).toFixed(2);
+                                newData.neT_AMT = Math.round(NetAmount + TaxSum + AdvSum);
                             } else {
                                 newData.neT_AMT = 0;
                             }
@@ -1645,6 +1646,7 @@ var empr_PurchaseBill = {
                         }
 
                         var Amount = newData.amt || 0;
+                        newData.amt = Math.round(Amount);
                         var Discount = parseFloat(currentRowData.disc) || 0;
                         var Tax = parseFloat(currentRowData.tax) || 0;
                         var Adv = parseFloat(currentRowData.adv) || 0;
@@ -1652,12 +1654,12 @@ var empr_PurchaseBill = {
                         var TaxAmount = Amount - DiscountAmount;
                         var TaxSum = TaxAmount * Tax / 100 || 0;
                         var AdvSum = (TaxAmount + TaxSum) * Adv / 100 || 0;
-                        newData.taX_AMT = TaxSum.toFixed(2);
+                        newData.taX_AMT = Math.round(TaxSum);
                         newData.adV_AMT = AdvSum.toFixed(2);
-                        newData.disC_AMT = DiscountAmount.toFixed(2);
+                        newData.disC_AMT = Math.round(DiscountAmount);
                         var NetAmount = Amount - DiscountAmount || 0;
                         if (!isNaN(NetAmount) && !isNaN(TaxSum) && !isNaN(AdvSum)) {
-                            newData.neT_AMT = (NetAmount + TaxSum + AdvSum).toFixed(2);
+                            newData.neT_AMT = Math.round(NetAmount + TaxSum + AdvSum);
                         } else {
                             newData.neT_AMT = 0;
                         }
@@ -1691,14 +1693,15 @@ var empr_PurchaseBill = {
                         var Tax = parseFloat(currentRowData.tax) || 0;
                         var Adv = parseFloat(currentRowData.adv) || 0;
                         var DiscountAmount = parseFloat(newData.disC_AMT) || 0;
+                        newData.disC_AMT = Math.round(DiscountAmount);
                         var TaxAmount = Amount - DiscountAmount;
                         var TaxSum = TaxAmount * Tax / 100 || 0;
                         var AdvSum = (TaxAmount + TaxSum) * Adv / 100 || 0;
-                        newData.taX_AMT = TaxSum.toFixed(2);
+                        newData.taX_AMT = Math.round(TaxSum);
                         newData.adV_AMT = AdvSum.toFixed(2);
                         var NetAmount = Amount - DiscountAmount || 0;
                         if (!isNaN(NetAmount) && !isNaN(TaxSum) && !isNaN(AdvSum)) {
-                            newData.neT_AMT = (NetAmount + TaxSum + AdvSum).toFixed(2);
+                            newData.neT_AMT = Math.round(NetAmount + TaxSum + AdvSum);
                         } else {
                             newData.neT_AMT = 0;
                         }
@@ -1723,14 +1726,15 @@ var empr_PurchaseBill = {
                         var Tax = parseFloat(currentRowData.tax) || 0;
                         var Adv = parseFloat(currentRowData.adv) || 0;
                         var DiscountAmount = parseFloat(newData.disC_AMT) || 0;
+                        newData.disC_AMT = Math.round(DiscountAmount);
                         var TaxAmount = Amount - DiscountAmount;
                         var TaxSum = TaxAmount * Tax / 100 || 0;
                         var AdvSum = (TaxAmount + TaxSum) * Adv / 100 || 0;
-                        newData.taX_AMT = TaxSum.toFixed(2);
+                        newData.taX_AMT = Math.round(TaxSum);
                         newData.adV_AMT = AdvSum.toFixed(2);
                         var NetAmount = Amount - DiscountAmount || 0;
                         if (!isNaN(NetAmount) && !isNaN(TaxSum) && !isNaN(AdvSum)) {
-                            newData.neT_AMT = (NetAmount + TaxSum + AdvSum).toFixed(2);
+                            newData.neT_AMT = Math.round(NetAmount + TaxSum + AdvSum);
                         } else {
                             newData.neT_AMT = 0;
                         }
@@ -1752,7 +1756,7 @@ var empr_PurchaseBill = {
                         var AdvSum = (TaxAmount + TaxSum) * Adv / 100 || 0;
 
                         if (!isNaN(TaxAmount) && !isNaN(Tax)) {
-                            newData.taX_AMT = TaxSum.toFixed(2);
+                            newData.taX_AMT = Math.round(TaxSum);
                             newData.adV_AMT = AdvSum.toFixed(2);
                         } else {
                             newData.taX_AMT = 0;
@@ -1760,7 +1764,7 @@ var empr_PurchaseBill = {
 
                         var NetAmount = Amount - DiscountAmount || 0;
                         if (!isNaN(NetAmount) && !isNaN(TaxSum) && !isNaN(AdvSum)) {
-                            newData.neT_AMT = (NetAmount + TaxSum + AdvSum).toFixed(2);
+                            newData.neT_AMT = Math.round(NetAmount + TaxSum + AdvSum);
                         } else {
                             newData.neT_AMT = 0;
                         }
@@ -1841,6 +1845,7 @@ var empr_PurchaseBill = {
                             }
 
                             var Amount = newData.amt || 0;
+                            newData.amt = Math.round(Amount);
                             var Discount = parseFloat(currentRowData.disc) || 0;
                             var Tax = parseFloat(currentRowData.tax) || 0;
                             var Adv = parseFloat(currentRowData.adv) || 0;
@@ -1850,7 +1855,7 @@ var empr_PurchaseBill = {
                             var AdvSum = (TaxAmount + TaxSum) * Adv / 100 || 0
                             var NetAmount = Amount - DiscountAmount || 0;
                             if (!isNaN(NetAmount) && !isNaN(TaxSum) && !isNaN(AdvSum)) {
-                                newData.neT_AMT = (NetAmount + TaxSum + AdvSum).toFixed(2);
+                                newData.neT_AMT = Math.round(NetAmount + TaxSum + AdvSum);
                             } else {
                                 newData.neT_AMT = 0;
                             }
@@ -1923,7 +1928,7 @@ var empr_PurchaseBill = {
                         var qty = parseFloat(row.baL_QTY) || 0;
 
                         var Amount = qty * rate;
-                        newData.amt = Amount.toFixed(2);
+                        newData.amt = Math.round(Amount);
 
                         var Discount = parseFloat(row.disc) || 0;
                         var Tax = parseFloat(row.tax) || 0;
@@ -1934,11 +1939,11 @@ var empr_PurchaseBill = {
                         var TaxSum = Taxable * Tax / 100;
                         var AdvSum = (Taxable + TaxSum) * Adv / 100;
 
-                        newData.disC_AMT = DiscountAmount.toFixed(2);
-                        newData.taX_AMT = TaxSum.toFixed(2);
+                        newData.disC_AMT = Math.round(DiscountAmount);
+                        newData.taX_AMT = Math.round(TaxSum);
                         newData.adV_AMT = AdvSum.toFixed(2);
 
-                        newData.neT_AMT = (Taxable + TaxSum + AdvSum).toFixed(2);
+                        newData.neT_AMT = Math.round(Taxable + TaxSum + AdvSum);
                     }
                 },
                 {
@@ -1966,14 +1971,15 @@ var empr_PurchaseBill = {
                         var Tax = parseFloat(currentRowData.tax) || 0;
                         var Adv = parseFloat(currentRowData.adv) || 0;
                         var DiscountAmount = parseFloat(newData.disC_AMT) || 0;
+                        newData.disC_AMT = Math.round(DiscountAmount);
                         var TaxAmount = Amount - DiscountAmount;
                         var TaxSum = TaxAmount * Tax / 100 || 0;
                         var AdvSum = (TaxAmount + TaxSum) * Adv / 100 || 0;
-                        newData.taX_AMT = TaxSum.toFixed(2);
+                        newData.taX_AMT = Math.round(TaxSum);
                         newData.adV_AMT = AdvSum.toFixed(2);
                         var NetAmount = Amount - DiscountAmount || 0;
                         if (!isNaN(NetAmount) && !isNaN(TaxSum) && !isNaN(AdvSum)) {
-                            newData.neT_AMT = (NetAmount + TaxSum + AdvSum).toFixed(2);
+                            newData.neT_AMT = Math.round(NetAmount + TaxSum + AdvSum);
                         } else {
                             newData.neT_AMT = 0;
                         }
@@ -1999,14 +2005,15 @@ var empr_PurchaseBill = {
                         var Tax = parseFloat(currentRowData.tax) || 0;
                         var Adv = parseFloat(currentRowData.adv) || 0;
                         var DiscountAmount = parseFloat(newData.disC_AMT) || 0;
+                        newData.disC_AMT = Math.round(DiscountAmount);
                         var TaxAmount = Amount - DiscountAmount;
                         var TaxSum = TaxAmount * Tax / 100 || 0;
                         var AdvSum = (TaxAmount + TaxSum) * Adv / 100 || 0;
-                        newData.taX_AMT = TaxSum.toFixed(2);
+                        newData.taX_AMT = Math.round(TaxSum);
                         newData.adV_AMT = AdvSum.toFixed(2);
                         var NetAmount = Amount - DiscountAmount || 0;
                         if (!isNaN(NetAmount) && !isNaN(TaxSum) && !isNaN(AdvSum)) {
-                            newData.neT_AMT = (NetAmount + TaxSum + AdvSum).toFixed(2);
+                            newData.neT_AMT = Math.round(NetAmount + TaxSum + AdvSum);
                         } else {
                             newData.neT_AMT = 0;
                         }
@@ -2018,7 +2025,7 @@ var empr_PurchaseBill = {
                         var Amount = parseFloat(rowData.amt) || 0;
                         var Disc = parseFloat(rowData.disc) || 0;
 
-                        return (Amount * Disc / 100).toFixed(2);
+                        return Math.round(Amount * Disc / 100);
                     }
                 },
                 {
@@ -2038,7 +2045,7 @@ var empr_PurchaseBill = {
                         var AdvSum = (TaxAmount + TaxSum) * Adv / 100 || 0;
 
                         if (!isNaN(TaxAmount) && !isNaN(Tax)) {
-                            newData.taX_AMT = TaxSum.toFixed(2);
+                            newData.taX_AMT = Math.round(TaxSum);
                             newData.adV_AMT = AdvSum.toFixed(2);
                         } else {
                             newData.taX_AMT = 0;
@@ -2046,7 +2053,7 @@ var empr_PurchaseBill = {
 
                         var NetAmount = Amount - DiscountAmount || 0;
                         if (!isNaN(NetAmount) && !isNaN(TaxSum) && !isNaN(AdvSum)) {
-                            newData.neT_AMT = (NetAmount + TaxSum + AdvSum).toFixed(2);
+                            newData.neT_AMT = Math.round(NetAmount + TaxSum + AdvSum);
                         } else {
                             newData.neT_AMT = 0;
                         }
@@ -2304,7 +2311,7 @@ var empr_PurchaseBill = {
                     rowData.rate = selectedItem.rate;
 
                 }
-                rowData.amt = rate * qty;
+                rowData.amt = Math.round(rate * qty);
                 rowData.hS_CODE = selectedItem.hscode;
             }
         } else {

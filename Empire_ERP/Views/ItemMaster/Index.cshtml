@@ -434,7 +434,11 @@
                     </div>
                     <div class="col-xl-3">
                         <label class="form-label" for="SALE_RATE">Sale Rate:</label>
-                        <input class="form-control" id="SALE_RATE" type="text" autocomplete="off" oninput="empr_helper.OnlyNumber(this)">
+                        <input class="form-control" id="SALE_RATE" type="text" autocomplete="off" oninput="empr_helper.OnlyNumber(this); empr_ItemMaster.CalculateMainRetailRate();">
+                    </div>
+                    <div class="col-xl-3">
+                        <label class="form-label" for="RETAIL_PER">Retail %:</label>
+                        <input class="form-control" id="RETAIL_PER" type="text" autocomplete="off" oninput="empr_helper.OnlyNumber(this); empr_ItemMaster.CalculateMainRetailRate();">
                     </div>
                     <div class="col-xl-3">
                         <label class="form-label" for="RETAIL_RATE">Retail Rate:</label>

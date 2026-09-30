@@ -22,6 +22,7 @@ namespace Empire_ERP.Core.Entities
         public int? PUNIT_CODE { get; set; }
         public double? SALE_RATE { get; set; }
         public double? RETAIL_RATE { get; set; }
+        public double? RETAIL_PER { get; set; }
         public double? PURCHASE_RATE { get; set; }
         public double? SALESTAX { get; set; }
         public int? ITAX_STATUS { get; set; }

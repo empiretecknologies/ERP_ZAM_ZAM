@@ -759,6 +759,7 @@ var empr_ItemMaster = {
                 $("#REMARKS").val(response.remarks)
                 $("#PACK").val(response.pack)
                 $("#SALE_RATE").val(response.salE_RATE)
+                $("#RETAIL_PER").val(response.retaiL_PER)
                 $("#RETAIL_RATE").val(response.retaiL_RATE)
                 $("#PURCHASE_RATE").val(response.purchasE_RATE)
                 $("#SALESTAX").val(response.salestax)
@@ -1196,6 +1197,7 @@ var empr_ItemMaster = {
         var BITYPE = $("#BITYPE").dxSelectBox('instance').option('value');
         var BARCODE = $("#BARCODE").val();
         var SALE_RATE = $("#SALE_RATE").val();
+        var RETAIL_PER = $("#RETAIL_PER").val();
         var RETAIL_RATE = $("#RETAIL_RATE").val();
         var PURCHASE_RATE = $("#PURCHASE_RATE").val();
         var SALESTAX = $("#SALESTAX").val();
@@ -1220,6 +1222,7 @@ var empr_ItemMaster = {
             PACK: PACK,
             PUNIT_CODE: PUNIT_CODE,
             SALE_RATE: SALE_RATE,
+            RETAIL_PER: RETAIL_PER,
             RETAIL_RATE: RETAIL_RATE,
             PURCHASE_RATE: PURCHASE_RATE,
             SALESTAX: SALESTAX,
@@ -1366,6 +1369,24 @@ var empr_ItemMaster = {
             $("#WholeSale").val((sale + salePerAmt).toFixed(0));
         }
     },
+    CalculateMainRetailRate: function () {
+        var retailPerText = $("#RETAIL_PER").val();
+        if (retailPerText === '' || retailPerText == null) {
+            return;
+        }
+        var saleRate = parseFloat($("#SALE_RATE").val());
+        var retailPer = parseFloat(retailPerText);
+        if (isNaN(saleRate)) {
+            saleRate = 0;
+        }
+        if (isNaN(retailPer)) {
+            return;
+        }
+        var percentAmount = (retailPer * saleRate) / 100;
+        var retailRate = saleRate + percentAmount;
+        retailRate = Math.round(retailRate);
+        $("#RETAIL_RATE").val(retailRate);
+    },
     CalculateRetailRate: function (element) {
         var inputValue = $(element).val();
         var sanitizedValue = '';
@@ -1433,6 +1454,7 @@ var empr_ItemMaster = {
         $("#REMARKS").val('');
         $("#PACK").val('');
         $("#SALE_RATE").val('');
+        $("#RETAIL_PER").val('');
         $("#RETAIL_RATE").val('');
         $("#PURCHASE_RATE").val('');
         $("#SALESTAX").val('');
