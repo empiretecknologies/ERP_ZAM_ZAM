@@ -540,7 +540,7 @@ namespace Empire_ERP.Infrastructure.Repositories
                     using (SqlConnection connection = new SqlConnection(new SQLService().getconnstring()))
                     {
                         string query = $"SELECT TRAN_ID,V_DATE,VOUCHER_NO,BTYPE, DOC,COMM,COMM_AMT,COMM_VAL,DISC,DISC_RATE,CARTAGE,TERMS,BACT_CODE,CACT_CODE,BAMT,CAMT," +
-                                       "PARTY_CODE,ACT_CODE,CURR_CODE,CRATE,REF,REMARKS,SCODE,SACODE,BCODE,PERIOD_ID," +
+                                       "PARTY_CODE,ACT_CODE,SPARTY_CODE,SACT_CODE, S_PER,CURR_CODE,CRATE,REF,REMARKS,SCODE,SACODE,BCODE,PERIOD_ID," +
                                        "ADD_USER_ID,ADD_DATE,ADD_COMPUTER_NAME,ADD_IP_ADDRESS," +
                                        "EDIT_USER_ID,EDIT_DATE,EDIT_COMPUTER_NAME,EDIT_IP_ADDRESS," +
                                        "ADD_POSTALCODE,EDIT_POSTALCODE,ASTATUS " +
@@ -550,6 +550,8 @@ namespace Empire_ERP.Infrastructure.Repositories
                         SqlDataReader reader = command.ExecuteReader();
                         while (reader.Read())
                         {
+                            int spartyCode = reader["SPARTY_CODE"] == DBNull.Value ? 0 : Convert.ToInt32(reader["SPARTY_CODE"]);
+                            int sactCode = reader["SACT_CODE"] == DBNull.Value ? 0 : Convert.ToInt32(reader["SACT_CODE"]);
                             var row = new
                             {
                                 ID = reader["TRAN_ID"] == DBNull.Value ? "" : Convert.ToString(reader["TRAN_ID"]),
@@ -573,10 +575,12 @@ namespace Empire_ERP.Infrastructure.Repositories
                                 REMARKS = reader["REMARKS"] == DBNull.Value ? "" : Convert.ToString(reader["REMARKS"]),
                                 PARTY_CODE = reader["PARTY_CODE"] == DBNull.Value ? 0 : Convert.ToInt32(reader["PARTY_CODE"]),
                                 ACT_CODE = reader["ACT_CODE"] == DBNull.Value ? 0 : Convert.ToInt32(reader["ACT_CODE"]),
+                                SPARTY_CODE = (spartyCode != 0 && sactCode != 0) ? $"{spartyCode}12345{sactCode}" : null,
                                 BACT = reader["BACT_CODE"] == DBNull.Value ? 0 : Convert.ToInt32(reader["BACT_CODE"]),
                                 CACT = reader["CACT_CODE"] == DBNull.Value ? 0 : Convert.ToInt32(reader["CACT_CODE"]),
                                 BAMT = reader["BAMT"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["BAMT"]),
                                 CAMT = reader["CAMT"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["CAMT"]),
+                                S_PER = reader["S_PER"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["S_PER"]),
 
                             };
                             jsonDataResult.Add(row);
@@ -1503,89 +1507,6 @@ namespace Empire_ERP.Infrastructure.Repositories
                         }
                     }
 
-
-
-
-
-
-
-
-
-
-                    //Dictionary<int?, double?> currentItems = new Dictionary<int?, double?>();
-                    //Dictionary<int?, double?> previousItems = new Dictionary<int?, double?>();
-                    //Dictionary<int?, double?> stockBalance = new Dictionary<int?, double?>();
-                    //if (stk_status == "Y")
-                    //{
-                    //    if (b_i == "B")
-                    //    {
-                    //        foreach (var item in modelRecord.Detail.ToList())
-                    //        {
-                    //            if (!currentItems.ContainsKey(item.ITEM_CODE))
-                    //            {
-                    //                currentItems.Add(item.ITEM_CODE, item.BAL_QTY);
-                    //            }
-                    //            else
-                    //            {
-                    //                currentItems[item.ITEM_CODE] += item.BAL_QTY;
-                    //            }
-                    //        }
-
-                    //        var itemCodes = string.Join(",", modelRecord.Detail.Select(x => x.ITEM_CODE).Distinct());
-                    //        string query = $@"EXEC STKPROC 71,'{startDate}','{endDate}','{common.Branch}','{common.Period}','',''";
-                    //        using (SqlConnection connection = new SqlConnection(new SQLService().getconnstring()))
-                    //        {
-                    //            SqlCommand command = new SqlCommand(query, connection);
-                    //            connection.Open();
-                    //            using (SqlDataReader reader = command.ExecuteReader())
-                    //            {
-                    //                while (reader.Read())
-                    //                {
-                    //                    int? itemCode = reader["ITEM_ID"] as int?;
-                    //                    double? balance = reader["BALANCE"] == DBNull.Value ? 0 : Convert.ToDouble(reader["BALANCE"]);
-
-                    //                    if (itemCode != null)
-                    //                        stockBalance.Add(itemCode, balance);
-                    //                }
-                    //            }
-                    //        }
-
-                    //        if (modelRecord.Master.TRAN_ID > 0)
-                    //        {
-                    //            previousItems = PreviousStockInBill(detailTable, modelRecord.Master.TRAN_ID, period, branch);
-
-                    //            foreach (var item in previousItems)
-                    //            {
-                    //                if (currentItems.ContainsKey(item.Key))
-                    //                {
-                    //                    currentItems[item.Key] = (currentItems[item.Key] ?? 0) - (item.Value ?? 0);
-
-                    //                    if (currentItems[item.Key] < 0)
-                    //                    {
-                    //                        currentItems[item.Key] = 0;
-                    //                    }
-                    //                }
-                    //            }
-                    //        }
-
-                    //        foreach (var item in currentItems)
-                    //        {
-                    //            double availableStock = stockBalance.ContainsKey(item.Key) ? stockBalance[item.Key] ?? 0 : 0;
-                    //            double currentQty = item.Value ?? 0;
-
-                    //            if (currentQty > availableStock)
-                    //            {
-                    //                List<CustomKeyValuPair> barcodes = DropdownService.BarcodesKeyAndValue();
-                    //                var SelectedItem = barcodes.Where(b => b.key == item.Key).FirstOrDefault();
-                    //                InSufficientItem = SelectedItem.value;
-                    //                InSufficientItemQty = availableStock;
-                    //                isStockSufficient = false;
-                    //                break;
-                    //            }
-                    //        }
-                    //    }
-                    //}
-
                     if (isStockSufficient)
                     {
                         using (SqlConnection connection = new SqlConnection(connectionString))
@@ -1635,14 +1556,14 @@ namespace Empire_ERP.Infrastructure.Repositories
                                     }
 
                                     query = $"INSERT INTO {table}" +
-                                            "(TRAN_ID,V_DATE,VOUCHER_NO,PARTY_CODE,ACT_CODE,DOC,TERMS,BACT_CODE,CACT_CODE,BAMT,CAMT," +
+                                            "(TRAN_ID,V_DATE,VOUCHER_NO, PARTY_CODE, ACT_CODE, SPARTY_CODE, SACT_CODE, S_PER, DOC, TERMS, BACT_CODE,CACT_CODE,BAMT,CAMT," +
                                             "REF,CURR_CODE,CRATE,REMARKS,SCODE,SACODE,BCODE,PERIOD_ID,COMM,COMM_VAL,COMM_AMT,DISC,DISC_RATE,CARTAGE,BTYPE," +
                                             "ADD_USER_ID,ADD_DATE,ADD_COMPUTER_NAME," +
                                             "ADD_IP_ADDRESS,EDIT_USER_ID,EDIT_DATE," +
                                             "EDIT_COMPUTER_NAME,EDIT_IP_ADDRESS,ADD_POSTALCODE," +
                                             "EDIT_POSTALCODE,ASTATUS,MENU_ID,DLT)" +
                                             "VALUES" +
-                                            "('" + code + "','" + modelRecord.Master.V_DATE + "','" + voucherNo + "','" + modelRecord.Master.PARTY_CODE + "','" + modelRecord.Master.ACT_CODE + "','" + modelRecord.Master.DOC + "','" + modelRecord.Master.TERMS + "','" + modelRecord.Master.BACT + "','" + modelRecord.Master.CACT + "','" + modelRecord.Master.BAMT + "','" + modelRecord.Master.CAMT + "'," +
+                                            "('" + code + "','" + modelRecord.Master.V_DATE + "','" + voucherNo + "','" + modelRecord.Master.PARTY_CODE + "','" + modelRecord.Master.ACT_CODE + "','" + modelRecord.Master.SPARTY_CODE + "','" + modelRecord.Master.SACT_CODE + "','" + modelRecord.Master.S_PER + "','" + modelRecord.Master.DOC + "','" + modelRecord.Master.TERMS + "','" + modelRecord.Master.BACT + "','" + modelRecord.Master.CACT + "','" + modelRecord.Master.BAMT + "','" + modelRecord.Master.CAMT + "'," +
                                             "'" + modelRecord.Master.REF + "','" + modelRecord.Master.CURR_CODE + "','" + modelRecord.Master.CRATE + "','" + modelRecord.Master.REMARKS + "','" + modelRecord.Master.SCODE + "','" + modelRecord.Master.SACODE + "','" + branch + "','" + period + "','" + modelRecord.Master.COMM + "','" + modelRecord.Master.COMM_VAL + "','" + modelRecord.Master.COMM_AMT + "','" + modelRecord.Master.DISC + "','" + modelRecord.Master.DISC_RATE + "','" + modelRecord.Master.CARTAGE + "','" + modelRecord.Master.BTYPE + "'," +
                                             "'" + username + "','" + CommonService.GetDateTime("Pakistan Standard Time") + "','" + Computer + "'," +
                                             "'" + Ip + "','" + username + "','" + CommonService.GetDateTime("Pakistan Standard Time") + "'," +
@@ -1654,8 +1575,11 @@ namespace Empire_ERP.Infrastructure.Repositories
                                 {
                                     query = $"UPDATE {table} SET V_DATE = '" + modelRecord.Master.V_DATE + @"',
                                                     PARTY_CODE = '" + modelRecord.Master.PARTY_CODE + @"',
-                                                    TERMS = '" + modelRecord.Master.TERMS + @"',
                                                     ACT_CODE = '" + modelRecord.Master.ACT_CODE + @"',
+                                                    SPARTY_CODE = '" + modelRecord.Master.SPARTY_CODE + @"',
+                                                    SACT_CODE = '" + modelRecord.Master.SACT_CODE + @"',
+                                                    S_PER = '" + modelRecord.Master.S_PER + @"',
+                                                    TERMS = '" + modelRecord.Master.TERMS + @"',
                                                     CACT_CODE = '" + modelRecord.Master.CACT + @"',
                                                     BACT_CODE = '" + modelRecord.Master.BACT + @"',
                                                     BAMT = '" + modelRecord.Master.BAMT + @"',
@@ -1698,7 +1622,7 @@ namespace Empire_ERP.Infrastructure.Repositories
                                 int detailCode = GenerateNextDetailId(common, command);
                                 foreach (var item in modelRecord.Detail.ToList())
                                 {
-                                    
+
                                     try
                                     {
                                         var amt = item.QTY * item.RATE;
@@ -1747,7 +1671,7 @@ namespace Empire_ERP.Infrastructure.Repositories
                                                     }
                                                 }
 
-                                                
+
 
                                                 insertQueryBuilder.AppendLine(
                                                     $"INSERT INTO {detailTable} (TRAN_ID, DT_CODE, ITEM_CODE, PARTY_CODE, ACT_CODE, QTY, UNIT, QTY2, BAL_QTY, RATE, AMT, DISC, DISC_AMT, TAX, TAX_AMT, ADV, ADV_AMT, NET_AMT, DT_DESC, COLOR, SIZE, GRADE, WAREHOUSE, DEL_DATE, DUE_DATE, DUE_DAYS, VEH, BCODE, PERIOD_ID, ADD_USER_ID, ADD_DATE, ADD_COMPUTER_NAME, ADD_IP_ADDRESS, EDIT_USER_ID, EDIT_DATE, EDIT_COMPUTER_NAME, EDIT_IP_ADDRESS, ADD_POSTALCODE, EDIT_POSTALCODE, MENU_ID, DLT, CHK, PICK_ID, PICK_ID_D,HS_CODE) VALUES " +

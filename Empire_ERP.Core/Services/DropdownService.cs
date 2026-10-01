@@ -178,6 +178,47 @@ namespace Empire_ERP.Core.Services
             }
             return dropdown;
         }
+
+        public static List<dynamic> SalesmanWithComm(int? roleId, string? branchId, int? showSelected)
+        {
+            List<dynamic> dropdown = new List<dynamic>();
+            using (SqlConnection conn = new SqlConnection(new SQLService().getconnstring()))
+            {
+                string query = "";
+                if (roleId > 0)
+                {
+                    if (showSelected == 1)
+                        query = $"SELECT PARTY_CODE, ACT_CODE, PARTY_NAME, COMM FROM TBL_PARTY_TYPES WHERE PARTY_TYPE_CODE = 9 AND DLT = 'T' AND ASTATUS = 'Y' AND PARTY_CODE IN (SELECT RMENU_ID FROM TBL_ROLE WHERE R_BCODE = {Convert.ToInt32(branchId)} AND MODULE_ID = 6 AND ROLE_ID = {roleId}) AND ACT_CODE IN (SELECT ACT_CODE FROM TBL_ROLE WHERE R_BCODE = {Convert.ToInt32(branchId)} AND MODULE_ID = 6 AND ROLE_ID = {roleId})";
+                    else
+                        query = $"SELECT PARTY_CODE, ACT_CODE, PARTY_NAME, COMM FROM TBL_PARTY_TYPES WHERE PARTY_TYPE_CODE = 9 AND DLT = 'T' AND ASTATUS = 'Y' AND PARTY_CODE NOT IN (SELECT RMENU_ID FROM TBL_ROLE WHERE R_BCODE = {Convert.ToInt32(branchId)} AND MODULE_ID = 6 AND ROLE_ID = {roleId}) AND ACT_CODE NOT IN (SELECT ACT_CODE FROM TBL_ROLE WHERE R_BCODE = {Convert.ToInt32(branchId)} AND MODULE_ID = 6 AND ROLE_ID = {roleId})";
+                }
+                else
+                {
+                    query = "SELECT PARTY_CODE, ACT_CODE, PARTY_NAME, COMM FROM TBL_PARTY_TYPES WHERE PARTY_TYPE_CODE = 9 AND DLT = 'T' AND ASTATUS = 'Y'";
+                }
+                using (SqlCommand command = new SqlCommand(query, conn))
+                {
+                    conn.Open();
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                int pcode = reader["PARTY_CODE"] == DBNull.Value ? 0 : Convert.ToInt32(reader["PARTY_CODE"]);
+                                int acode = reader["ACT_CODE"] == DBNull.Value ? 0 : Convert.ToInt32(reader["ACT_CODE"]);
+                                string? customKey = $"{Convert.ToInt32(reader["PARTY_CODE"])}12345{Convert.ToInt32(reader["ACT_CODE"])}";
+                                string name = reader["PARTY_NAME"] == DBNull.Value ? "" : Convert.ToString(reader["PARTY_NAME"]);
+                                int comm = reader["COMM"] == DBNull.Value ? 0 : Convert.ToInt32(reader["COMM"]);
+                                
+                                dropdown.Add(new { key = customKey, value = name, comm = comm, pcode = pcode, acode = acode });
+                            }
+                        }
+                    }
+                }
+            }
+            return dropdown;
+        }
         public static List<KeyValuePair<int, string>> SalesmanDropdown(int? roleId, string? branchId, int? showSelected)
         {
             List<KeyValuePair<int, string>> dropdown = new List<KeyValuePair<int, string>>();

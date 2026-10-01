@@ -90,7 +90,11 @@ namespace Empire_ERP.Controllers
                 ViewBag.Items = DropdownService.CustomBarcodeDropdownWithPurchaseRate(dcType);
             }
 
-            
+
+            ViewBag.SalesmanWithComm = common.RoleType == "A"
+                ? DropdownService.SalesmanWithComm(0, common.Branch, 0)
+                : DropdownService.SalesmanWithComm(common.RoleID, common.Branch, common.ShowSelected);
+
             ViewBag.Type = nextId;
             ViewBag.FormType = formType;
             ViewBag.CompCond = compCond;

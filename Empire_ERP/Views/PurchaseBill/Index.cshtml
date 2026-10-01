@@ -23,6 +23,8 @@
             <input id="acthidden" hidden />
             <input id="salesmanhidden" hidden />
             <input id="itemIdHidden" hidden />
+            <input id="sPartyCode" hidden />
+            <input id="sActCode" hidden />
             <div class="col-xl-3">
                 <label class="form-label" for="Code">Code:</label>
                 <input class="form-control" id="Code" readonly type="text" autocomplete="off">
@@ -119,6 +121,16 @@
                         </a>
                     </div>
                 </div>
+            </div>
+
+            <div class="col-xl-3">
+                <label class="form-label" for="SPARTY_CODE">Salesmen:</label>
+                <div id="SPARTY_CODE"></div>
+            </div>
+
+            <div class="col-xl-3">
+                <label class="form-label" for="S_PER">Salesmen %</label>
+                <input class="form-control" id="S_PER" type="text" autocomplete="off">
             </div>
 
             <div class="col-xl-6">
@@ -420,6 +432,7 @@
         var StockList = @Html.Raw(Json.Serialize(ViewBag.StockList));
         var CashAccounts = @Html.Raw(Json.Serialize(ViewBag.CashAccounts));
         var BankAccounts = @Html.Raw(Json.Serialize(ViewBag.BankAccounts));
+        var SalesmanWithComm = @Html.Raw(Json.Serialize(ViewBag.SalesmanWithComm));
 
     </script>
     <script src="~/js/customjs/empr_PurchaseBill.js" asp-append-version="true"></script>

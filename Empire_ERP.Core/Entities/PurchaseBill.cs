@@ -13,8 +13,11 @@ namespace Empire_ERP.Core.Entities
         public DateTime? V_DATE { get; set; }
         public string? VOUCHER_NO { get; set; }
         public int? PARTY_CODE { get; set; }
-        public int? BARCODE_ID { get; set; }
         public int? ACT_CODE { get; set; }
+        public int? SPARTY_CODE { get; set; }
+        public int? SACT_CODE { get; set; }
+        public decimal? S_PER { get; set; }
+        public int? BARCODE_ID { get; set; }
         public int? BACT { get; set; }
         public int? CACT { get; set; }
         public int? SCODE { get; set; }

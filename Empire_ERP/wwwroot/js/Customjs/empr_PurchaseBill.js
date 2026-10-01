@@ -54,6 +54,7 @@ var empr_PurchaseBill = {
     firstClick: 0,
     CommissionTranId: 0,
     isProcessingRate: false,
+    isEditData: false,
     isSalesman: false,
     vDate: '',
     vdate: '',
@@ -66,6 +67,7 @@ var empr_PurchaseBill = {
             empr_PurchaseBill.GetCurrentStock();
             empr_PurchaseBill.ResetForm();
             empr_PurchaseBill.InitPartyType();
+            //empr_PurchaseBill.InitSalesmanDDL(null, false);
             empr_PurchaseBill.InitCashAccount();
             empr_PurchaseBill.InitBankAccount();
             empr_PurchaseBill.InitItemIds();
@@ -2845,6 +2847,7 @@ var empr_PurchaseBill = {
                     debugger;
                     $('#pickItems').show();
                     empr_PurchaseBill.pickIds = [];
+                    empr_PurchaseBill.isEditData = true;
                     var response = masterData[0];
                     empr_PurchaseBill.vDate = response.v_DATE;
                     var filteredData = $.grep(PartyType, function (item) {
@@ -2865,11 +2868,12 @@ var empr_PurchaseBill = {
                     $('#REF').val(response.ref);
                     $('#REMARKS').val(response.remarks);
                     //$('#HS_CODE').val(response.hS_CODE);
+                    $('#S_PER').val(response.s_PER);
                     $('#COMM').val(response.comm);
                     $('#TERMS').val(response.terms);
                     $('#COMM_VAL').val(response.comM_VAL);
                     //$('#COMM_AMT').dxSelectBox('instance').option('value', response.comM_AMT);
-                    empr_PurchaseBill.InitSalesman(0, parseInt(response.scode));
+                    empr_PurchaseBill.InitSalesmanDDL(response.spartY_CODE);
                     //$('#SCODE').dxSelectBox('instance').option('value', parseInt(response.scode));
                     $('#DISC').val(response.disc);
                     $('#DISC_RATE').val(response.disC_RATE);
@@ -2993,6 +2997,8 @@ var empr_PurchaseBill = {
         var VOUCHER_NO = $("#VOUCHER_NO").val();
         var PARTY_CODE = $("#partyhidden").val();
         var ACT_CODE = $("#acthidden").val();
+        var SPARTY_CODE = $("#sPartyCode").val();
+        var SACT_CODE = $("#sActCode").val();
         var REF = $("#REF").val();
         var REMARKS = $("#REMARKS").val();
         //var BARCODEID = $("#barcodeId").val();
@@ -3004,6 +3010,7 @@ var empr_PurchaseBill = {
         var BACT = $("#BACT").dxSelectBox('option', 'value');
         var BAMT = $("#BAMT").val();
         var CAMT = $("#CAMT").val();
+        var S_PER = $("#S_PER").val();
 
         var DISC = $("#DISC").val();
         var DISC_RATE = $("#DISC_RATE").val();
@@ -3024,7 +3031,10 @@ var empr_PurchaseBill = {
             VOUCHER_NO: VOUCHER_NO,
             PARTY_CODE: PARTY_CODE,
             ACT_CODE: ACT_CODE,
+            SPARTY_CODE: SPARTY_CODE,
+            SACT_CODE: SACT_CODE,
             COMM: COMM,
+            S_PER: S_PER,
             COMM_VAL: COMM_VAL,
             COMM_AMT: COMM_AMT,
             DISC: DISC,
@@ -3308,6 +3318,7 @@ var empr_PurchaseBill = {
         $('#BARCODE').val('');
         $('.nav-item.commission').hide();
         empr_PurchaseBill.pickIds = [];
+        empr_PurchaseBill.isEditData = false;
         empr_PurchaseBill.firstClick = 0;
         empr_PurchaseBill.CommissionTranId = 0;
         empr_helper.selectedBill = 0;
@@ -3316,11 +3327,13 @@ var empr_PurchaseBill = {
         empr_PurchaseBill.actCode = 0;
         //empr_PurchaseBill.CreateGrid([]);
         empr_PurchaseBill.InitPartyType();
+        empr_PurchaseBill.InitSalesmanDDL(null, false);
         empr_PurchaseBill.InitCurrencyDDL();
         empr_PurchaseBill.InitBankAccount();
         empr_PurchaseBill.InitCashAccount();
         empr_PurchaseBill.InitCommissionAmtDDL("PR");
         $('#PARTY_CODE').dxSelectBox('instance').option('value', '');
+        //$('#SPARTY_CODE').dxSelectBox('instance').option('value', '');
         //$('#CACT').dxSelectBox('instance').option('value', '');
         //$('#BACT').dxSelectBox('instance').option('value', '');
 
@@ -3420,6 +3433,14 @@ var empr_PurchaseBill = {
 
     },
 
+    //InitSalesmanDDL: function () {
+    //    ////debugger;
+    //    empr_PurchaseBill.bindSalesmenDxDdl("SPARTY_CODE", SalesmanWithComm, null, "key", "value", "Select", function (d) {
+    //        empr_PurchaseBill.OnSalesmenChange(d);
+    //    });
+
+    //},
+
     OnPartyChange: function (d) {
         console.log(d)
         if (d.value == null || d.value == '') {
@@ -3490,6 +3511,24 @@ var empr_PurchaseBill = {
             }
         }
     },
+
+    //OnSalesmenChange: function (d) {
+    //    debugger;
+    //    if (d.value == null || d.value == '') {
+    //        $('#spartyhidden').val('');
+    //        $('#sacthidden').val('');
+    //    }
+    //    else {
+    //        var filteredData = $.grep(SalesmanWithComm, function (item) {
+    //            return item.key === d.value;
+    //        });
+
+    //        console.log("Party:" + filteredData);
+    //        $('#spartyhidden').val(filteredData[0].partyCode);
+    //        $('#sacthidden').val(filteredData[0].accountCode);
+
+    //    }
+    //},
 
     ItemsBehalfOnParty: function (PARTY_CODE, ACT_CODE) {
         ajaxHelper.ajaxGetJson('/PurchaseBill/ItemsBehalfOnParty?partyCode=' + PARTY_CODE + '&actCode=' + ACT_CODE, function (data) {
@@ -3595,6 +3634,11 @@ var empr_PurchaseBill = {
         });
     },
     bindDxDdl: function (divId, data, selectedvalues, keyExp, dataField, placeholder, onvalueChangeFun) {
+
+        ati_dxHelper.createDropdownSingle(divId, data, selectedvalues, keyExp, dataField, placeholder, onvalueChangeFun);
+
+    },
+    bindSalesmenDxDdl: function (divId, data, selectedvalues, keyExp, dataField, placeholder, onvalueChangeFun) {
 
         ati_dxHelper.createDropdownSingle(divId, data, selectedvalues, keyExp, dataField, placeholder, onvalueChangeFun);
 
@@ -3919,6 +3963,44 @@ var empr_PurchaseBill = {
         });
     },
 
+    InitSalesmanDDL: function (selectedValue) {
+        debugger;
+        $('#SPARTY_CODE').dxSelectBox({
+            dataSource: SalesmanWithComm,
+            displayExpr: 'value',
+            valueExpr: 'key',
+            value: selectedValue,
+            searchEnabled: true,
+            width: '100%',
+            placeholder: 'Search',
+            showClearButton: true,
+            dropDownOptions: {
+                height: 'auto',
+            },
+            pagingEnabled: true,
+            searchTimeout: 500,
+            onValueChanged: function (e) {
+                debugger;
+                if (!e.value) {
+                    $('#sPartyCode').val('');
+                    $('#sActCode').val('');
+                    $('#S_PER').val('');
+                    return;
+                }
+
+                var selectedItem = e.component.option('selectedItem');
+
+                if (selectedItem) {
+                    $('#sPartyCode').val(selectedItem.pcode);
+                    $('#sActCode').val(selectedItem.acode);
+                    if (!empr_PurchaseBill.isEditData) {
+                        $('#S_PER').val(selectedItem.comm);
+                    }
+
+                }
+            }
+        });
+    },
 
     CalculateCommition: function () {
         var grid = $("#DetailContainer").dxDataGrid("instance");
