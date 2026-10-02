@@ -2204,7 +2204,8 @@ var empr_ItemMaster = {
             { header: 'ItemName', key: 'ItemName', width: 40 },
             { header: 'Category', key: 'Category', width: 25 },
             { header: 'Packing', key: 'Packing', width: 15 },
-            { header: 'Sale Rate', key: 'SaleRate', width: 15 }
+            { header: 'Sale Rate', key: 'SaleRate', width: 15 },
+            { header: 'Retail %', key: 'RetailPer', width: 15 }
         ];
         workbook.xlsx.writeBuffer().then(function (buffer) {
             saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'ItemBulkUploadTemplate.xlsx');
@@ -2281,7 +2282,9 @@ var empr_ItemMaster = {
                     var category = empr_ItemMaster.GetBulkCellText(row.getCell(columnMap['category']));
                     var packing = empr_ItemMaster.GetBulkCellText(row.getCell(columnMap['packing']));
                     var saleRate = empr_ItemMaster.GetBulkCellText(row.getCell(columnMap['salerate']));
-                    if (itemName === '' && category === '' && packing === '' && saleRate === '') {
+                    var retailPerCol = columnMap['retail%'] || columnMap['retailper'];
+                    var retailPer = retailPerCol ? empr_ItemMaster.GetBulkCellText(row.getCell(retailPerCol)) : '';
+                    if (itemName === '' && category === '' && packing === '' && saleRate === '' && retailPer === '') {
                         return;
                     }
                     rows.push({
@@ -2289,7 +2292,8 @@ var empr_ItemMaster = {
                         ItemName: itemName,
                         Category: category,
                         Packing: packing,
-                        SaleRate: saleRate
+                        SaleRate: saleRate,
+                        RetailPer: retailPer
                     });
                 });
 

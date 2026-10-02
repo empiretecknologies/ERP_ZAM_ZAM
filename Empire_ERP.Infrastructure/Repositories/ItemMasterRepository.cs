@@ -1873,11 +1873,13 @@ namespace Empire_ERP.Infrastructure.Repositories
                     string category = (row.Category ?? "").Trim();
                     string packing = (row.Packing ?? "").Trim();
                     string saleRateText = (row.SaleRate ?? "").Trim();
+                    string retailPerText = (row.RetailPer ?? "").Trim();
 
                     row.ItemName = itemName;
                     row.Category = category;
                     row.Packing = packing;
                     row.SaleRate = saleRateText;
+                    row.RetailPer = retailPerText;
 
                     if (string.IsNullOrWhiteSpace(itemName))
                         reasons.Add("Item name is required.");
@@ -1897,6 +1899,10 @@ namespace Empire_ERP.Infrastructure.Repositories
                     else if (!double.TryParse(saleRateText, out saleRate))
                         reasons.Add("Sale Rate is not valid.");
 
+                    double retailPer = 0;
+                    if (!string.IsNullOrWhiteSpace(retailPerText) && !double.TryParse(retailPerText, out retailPer))
+                        reasons.Add("Retail % is not valid.");
+
                     if (reasons.Count > 0)
                     {
                         row.FailureReason = string.Join(" ", reasons);
@@ -1914,6 +1920,8 @@ namespace Empire_ERP.Infrastructure.Repositories
                         row.PUNIT_CODE = units[packing];
                     }
                     row.SALE_RATE = saleRate;
+                    row.RETAIL_PER = retailPer;
+                    row.RETAIL_RATE = Math.Round(saleRate + (saleRate * retailPer / 100), MidpointRounding.AwayFromZero);
                     fileNames.Add(itemName);
                     existingNames.Add(itemName);
                     successRecords.Add(row);
@@ -1962,11 +1970,27 @@ namespace Empire_ERP.Infrastructure.Repositories
                             row.SALE_RATE = parsedRate;
                     }
 
+                    if (row.RETAIL_PER == null && !string.IsNullOrWhiteSpace(row.RetailPer))
+                    {
+                        double parsedPer;
+                        if (double.TryParse(row.RetailPer, out parsedPer))
+                            row.RETAIL_PER = parsedPer;
+                    }
+
+                    if (row.RETAIL_PER == null)
+                        row.RETAIL_PER = 0;
+
+                    double saleRateValue = row.SALE_RATE ?? 0;
+                    double retailPerValue = row.RETAIL_PER ?? 0;
+                    row.RETAIL_RATE = Math.Round(saleRateValue + (saleRateValue * retailPerValue / 100), MidpointRounding.AwayFromZero);
+
                     ItemMaster itemMaster = new ItemMaster();
                     itemMaster.ITEM_CODE = 0;
                     itemMaster.ITEM_NAME = row.ItemName;
                     itemMaster.PACK = row.Packing;
                     itemMaster.SALE_RATE = row.SALE_RATE;
+                    itemMaster.RETAIL_PER = row.RETAIL_PER;
+                    itemMaster.RETAIL_RATE = row.RETAIL_RATE;
                     itemMaster.GROUP_CODE = row.GROUP_CODE;
                     itemMaster.CAT_CODE = row.CAT_CODE;
                     itemMaster.IUNIT_CODE = row.IUNIT_CODE;

@@ -55,11 +55,14 @@ namespace Empire_ERP.Core.Entities
         public string? Category { get; set; }
         public string? Packing { get; set; }
         public string? SaleRate { get; set; }
+        public string? RetailPer { get; set; }
         public string? FailureReason { get; set; }
         public int? GROUP_CODE { get; set; }
         public int? CAT_CODE { get; set; }
         public int? IUNIT_CODE { get; set; }
         public int? PUNIT_CODE { get; set; }
         public double? SALE_RATE { get; set; }
+        public double? RETAIL_PER { get; set; }
+        public double? RETAIL_RATE { get; set; }
     }
 }
