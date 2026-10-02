@@ -52,6 +52,7 @@ var empr_PurchaseBill = {
     originalValues: {},
     ItemsOnParty: [],
     firstClick: 0,
+    Parties: PartyType,
     CommissionTranId: 0,
     isProcessingRate: false,
     isEditData: false,
@@ -3207,6 +3208,31 @@ var empr_PurchaseBill = {
             return valid;
         }
 
+        var netAmount = parseFloat(String($('#NetAmount').val() || '').replace(/,/g, '')) || 0;
+        var balanceText = String($('#PARTY_BALANCE').val() || '').trim();
+        var previousBalance = parseFloat(balanceText.replace(/[^0-9.]/g, '')) || 0;
+        if (balanceText.indexOf('(') !== -1) {
+            previousBalance = previousBalance * -1;
+        }
+
+        var partyValue = $('#PARTY_CODE').dxSelectBox('instance').option('value');
+        var selectedParty = $.grep(PartyType, function (item) {
+            return item.key === partyValue;
+        });
+        var creditLimit = selectedParty.length > 0 ? (parseFloat(selectedParty[0].creditLimit) || 0) : 0;
+
+        if ((previousBalance + netAmount) > creditLimit) {
+            var excessAmt = (previousBalance + netAmount) - creditLimit;
+            empr_helper.notify(
+                "Party credit limit exceeded.<br>" +
+                "Credit Limit: " + creditLimit + "<br>" +
+                "Excess Amount: " + excessAmt,
+                2
+            );
+            valid = false;
+            return valid;
+        }
+
         return valid;
     },
     //Save: function () {
@@ -3427,7 +3453,7 @@ var empr_PurchaseBill = {
     },
     InitPartyType: function () {
         ////debugger;
-        empr_PurchaseBill.bindDxDdl("PARTY_CODE", PartyType, null, "key", "value", "Select", function (d) {
+        empr_PurchaseBill.bindDxDdl("PARTY_CODE", empr_PurchaseBill.Parties , null, "key", "value", "Select", function (d) {
             empr_PurchaseBill.OnPartyChange(d);
         });
 

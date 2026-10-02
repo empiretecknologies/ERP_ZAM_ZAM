@@ -5423,7 +5423,8 @@ M.RETAIL_RATE,
                                     M.PAYMENT_TERMS,
                                     M.COMM,
                                     M.REGION,
-                                    M.PARTY_TYPE_CODE
+                                    M.PARTY_TYPE_CODE,
+                                    M.CREDIT_LIMIT
                                 FROM TBL_PARTY_TYPES M
                                 WHERE @ROLE_TYPE = 'A'
                                   AND M.DLT = 'T'
@@ -5443,7 +5444,8 @@ M.RETAIL_RATE,
                                     M.PAYMENT_TERMS,
                                     M.COMM,
                                     M.REGION,
-                                    M.PARTY_TYPE_CODE
+                                    M.PARTY_TYPE_CODE,
+                                    M.CREDIT_LIMIT
                                 FROM TBL_PARTY_TYPES M
                                 INNER JOIN TBL_ROLE R
                                     ON R.RMENU_ID = M.PARTY_CODE
@@ -5470,7 +5472,8 @@ M.RETAIL_RATE,
                                     M.PAYMENT_TERMS,
                                     M.COMM,
                                     M.REGION,
-                                    M.PARTY_TYPE_CODE
+                                    M.PARTY_TYPE_CODE,
+                                    M.CREDIT_LIMIT
                                 FROM TBL_PARTY_TYPES M
                                 WHERE @ROLE_TYPE = 'U'
                                   AND M.DLT = 'T'
@@ -5505,6 +5508,7 @@ M.RETAIL_RATE,
                                 string? accountCode = Convert.ToString(reader["ACT_CODE"]);
                                 string? regionCode = Convert.ToString(reader["REGION"]);
                                 string? natureCode = Convert.ToString(reader["PARTY_TYPE_CODE"]);
+                                double creditLimit = reader["CREDIT_LIMIT"] == DBNull.Value ? 0 : Convert.ToDouble(reader["CREDIT_LIMIT"]);
                                 //string? scode = Convert.ToString(reader["S_CODE"]);
                                 //string? regionCode = Convert.ToString(reader["REGION"]);
                                 //string? disc = Convert.ToString(reader["DISC"]);
@@ -5516,7 +5520,8 @@ M.RETAIL_RATE,
                                     partyCode = code,
                                     accountCode = accountCode,
                                     regionCode = regionCode,
-                                    natureCode = natureCode
+                                    natureCode = natureCode,
+                                    creditLimit = creditLimit
                                     //balance = balance,
                                     //regionCode = regionCode,
                                     //disc = disc,
