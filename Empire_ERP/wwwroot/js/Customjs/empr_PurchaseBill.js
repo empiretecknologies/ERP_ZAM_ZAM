@@ -3220,18 +3220,20 @@ var empr_PurchaseBill = {
             return item.key === partyValue;
         });
         var creditLimit = selectedParty.length > 0 ? (parseFloat(selectedParty[0].creditLimit) || 0) : 0;
-
-        if ((previousBalance + netAmount) > creditLimit) {
-            var excessAmt = (previousBalance + netAmount) - creditLimit;
-            empr_helper.notify(
-                "Party credit limit exceeded.<br>" +
-                "Credit Limit: " + creditLimit + "<br>" +
-                "Excess Amount: " + excessAmt,
-                2
-            );
-            valid = false;
-            return valid;
+        if (creditLimit > 0) {
+            if ((previousBalance + netAmount) > creditLimit) {
+                var excessAmt = (previousBalance + netAmount) - creditLimit;
+                empr_helper.notify(
+                    "Party credit limit exceeded.<br>" +
+                    "Credit Limit: " + creditLimit + "<br>" +
+                    "Excess Amount: " + excessAmt,
+                    3
+                );
+                //valid = false;
+                //return valid;
+            }
         }
+        
 
         return valid;
     },

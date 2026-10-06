@@ -1018,6 +1018,84 @@ namespace Empire_ERP.Core.Services
             return dropdown;
         }
 
+        public static List<KeyValuePair<int, string>> SalaryHeadsChartDropdown()
+        {
+            List<KeyValuePair<int, string>> dropdown = new List<KeyValuePair<int, string>>();
+            using (SqlConnection conn = new SqlConnection(new SQLService().getconnstring()))
+            {
+                string query = "SELECT ACT_CODE, ACT_NAME FROM TBL_CHART WHERE ACT_TYPE = 'S' AND DLT = 'T' AND ASTATUS = 'Y' AND ACT_NATURE NOT IN (1,2,3,4)";
+                using (SqlCommand command = new SqlCommand(query, conn))
+                {
+                    conn.Open();
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                int code = reader.GetInt32(0);
+                                string name = reader.GetString(1);
+                                dropdown.Add(new KeyValuePair<int, string>(code, name));
+                            }
+                        }
+                    }
+                }
+            }
+            return dropdown;
+        }
+
+        public static List<KeyValuePair<int, string>> EmpRegistrationDropdown()
+        {
+            List<KeyValuePair<int, string>> dropdown = new List<KeyValuePair<int, string>>();
+            using (SqlConnection conn = new SqlConnection(new SQLService().getconnstring()))
+            {
+                string query = "SELECT ID, LTRIM(RTRIM(ISNULL(FIRST_NAME,'') + ' ' + ISNULL(LAST_NAME,''))) AS EMPLOYEE_NAME FROM TBL_EMP_REG WHERE DLT = 'T' AND ASTATUS = 'Y'";
+                using (SqlCommand command = new SqlCommand(query, conn))
+                {
+                    conn.Open();
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                int code = reader.GetInt32(0);
+                                string name = reader.GetString(1);
+                                dropdown.Add(new KeyValuePair<int, string>(code, name));
+                            }
+                        }
+                    }
+                }
+            }
+            return dropdown;
+        }
+
+        public static List<KeyValuePair<int, string>> EmpDepartmentDropdown()
+        {
+            List<KeyValuePair<int, string>> dropdown = new List<KeyValuePair<int, string>>();
+            using (SqlConnection conn = new SqlConnection(new SQLService().getconnstring()))
+            {
+                string query = "SELECT GROUP_CODE, GROUP_NAME FROM TBL_DEPARTMENTS WHERE DLT = 'T'";
+                using (SqlCommand command = new SqlCommand(query, conn))
+                {
+                    conn.Open();
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                int code = reader.GetInt32(0);
+                                string name = reader.GetString(1);
+                                dropdown.Add(new KeyValuePair<int, string>(code, name));
+                            }
+                        }
+                    }
+                }
+            }
+            return dropdown;
+        }
+
         public static List<KeyValuePair<int, string>> DepartmentDropdown()
         {
             List<KeyValuePair<int, string>> dropdown = new List<KeyValuePair<int, string>>();

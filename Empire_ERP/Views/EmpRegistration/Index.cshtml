@@ -1,0 +1,97 @@
+<div class="card">
+    <div class="card-header">
+        <button type="button" id="quicksearch" class="btn btn-light btn-search waves-effect waves-light" data-bs-toggle="modal" data-bs-target=".bs-example-modal-xl"><i class="fa fa-search"></i> Quick Search</button>
+        <button type="button" id="BtnNew" style="display:none" class="btn btn-primary btn-new waves-effect waves-light float-end"><i class="fa fa-plus"></i> Add New</button>
+    </div>
+    <div class="card-body Record">
+        <div class="row">
+            <div class="col-xl-4">
+                <label class="form-label" for="Code">Code:</label>
+                <input class="form-control" id="Code" readonly type="text" autocomplete="off">
+            </div>
+            <div class="col-xl-4">
+                <label class="form-label" for="ASTATUS">Status:</label>
+                <div id="ASTATUS"></div>
+            </div>
+            <div class="col-xl-4 mb-1">
+                <label class="form-label" for="EMPLOYEE_CODE">Employee Code:</label>
+                <input class="form-control" id="EMPLOYEE_CODE" type="text" autocomplete="off">
+            </div>
+            <div class="col-xl-4 mb-1">
+                <label class="form-label" for="FIRST_NAME">First Name:</label>
+                <input class="form-control" id="FIRST_NAME" type="text" autocomplete="off">
+            </div>
+            <div class="col-xl-4 mb-1">
+                <label class="form-label" for="LAST_NAME">Last Name:</label>
+                <input class="form-control" id="LAST_NAME" type="text" autocomplete="off">
+            </div>
+            <div class="col-xl-4 mb-1">
+                <label class="form-label" for="EMAIL">Email:</label>
+                <input class="form-control" id="EMAIL" type="text" autocomplete="off">
+            </div>
+            <div class="col-xl-4 mb-1">
+                <label class="form-label" for="PHONE">Phone:</label>
+                <input class="form-control" id="PHONE" type="text" autocomplete="off">
+            </div>
+            <div class="col-xl-4 mb-1">
+                <label class="form-label" for="DEPARTMENT_ID">Department:</label>
+                <div id="DEPARTMENT_ID"></div>
+            </div>
+            <div class="col-xl-4 mb-1">
+                <label class="form-label" for="DESIGNATION_ID">Designation:</label>
+                <div id="DESIGNATION_ID"></div>
+            </div>
+            <div class="col-xl-4 mb-1">
+                <label class="form-label" for="MACHINE_ID">Machine ID:</label>
+                <input class="form-control" id="MACHINE_ID" type="number" autocomplete="off">
+            </div>
+            <div class="col-xl-4 mb-1">
+                <label class="form-label" for="JOINING_DATE">Joining Date:</label>
+                <input class="form-control" id="JOINING_DATE" type="date" autocomplete="off">
+            </div>
+            <div class="col-xl-4 mb-1">
+                <label class="form-label" for="EMP_PIC_FILE">Picture:</label>
+                <input type="hidden" id="EMP_PIC" />
+                <input class="form-control" id="EMP_PIC_FILE" type="file" accept="image/*" autocomplete="off">
+            </div>
+            <span class="span name-validation"></span>
+            <div class="col-xl-12 text-end">
+                <button class="btn btn-danger btn-delete" style="display:none" id="BtnDelete"><i class="fa fa-trash"></i> Delete</button>
+                <button class="btn btn-primary btn-save" id="BtnSave"><i class="fa fa-save"></i> Save</button>
+            </div>
+        </div>
+    </div>
+    <!--  Extra Large modal example -->
+    <div class="modal fade bs-example-modal-xl" tabindex="-1" role="dialog" aria-labelledby="myExtraLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="myExtraLargeModalLabel">Quick Search</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="col-md-12">
+                        <div class="card text-left">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <div id="gridContainer"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+</div>
+@section LinkScriptSection{
+    <script type="text/javascript">
+        var Permissions = @Html.Raw(Json.Serialize(ViewBag.Permissions));
+    </script>
+    <script src="~/js/customjs/empr_EmpRegistration.js" asp-append-version="true"></script>
+    <script type="text/javascript">
+        $(function () {
+            empr_EmpRegistration.initEvents();
+        });
+    </script>
+}

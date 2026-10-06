@@ -1,0 +1,92 @@
+<div class="card">
+    <div class="card-header">
+        <button type="button" id="quicksearch" class="btn btn-light btn-search waves-effect waves-light" data-bs-toggle="modal" data-bs-target=".bs-example-modal-xl"><i class="fa fa-search"></i> Quick Search</button>
+        <button type="button" id="BtnNew" style="display:none" class="btn btn-primary btn-new waves-effect waves-light float-end"><i class="fa fa-plus"></i> Add New</button>
+    </div>
+    <div class="card-body Record">
+        <div class="row">
+            <div class="col-xl-4">
+                <label class="form-label" for="Code">Code</label>
+                <input class="form-control" id="Code" readonly type="text" autocomplete="off">
+            </div>
+            <div class="col-xl-4">
+                <label class="form-label" for="ASTATUS">Status:</label>
+                <div id="ASTATUS"></div>
+            </div>
+            <div class="col-xl-4 mb-1">
+                <label class="form-label" for="BASIC_SALARY_COA_ID">Basic Salary</label>
+                <div id="BASIC_SALARY_COA_ID"></div>
+            </div>
+            <div class="col-xl-4 mb-1">
+                <label class="form-label" for="HOUSE_ALLOWANCE_COA_ID">House Allowance</label>
+                <div id="HOUSE_ALLOWANCE_COA_ID"></div>
+            </div>
+            <div class="col-xl-4 mb-1">
+                <label class="form-label" for="MEDICAL_ALLOWANCE_COA_ID">Medical Allowance</label>
+                <div id="MEDICAL_ALLOWANCE_COA_ID"></div>
+            </div>
+            <div class="col-xl-4 mb-1">
+                <label class="form-label" for="CONVEYANCE_ALLOWANCE_COA_ID">Conveyance Allowance</label>
+                <div id="CONVEYANCE_ALLOWANCE_COA_ID"></div>
+            </div>
+            <div class="col-xl-4 mb-1">
+                <label class="form-label" for="OVERTIME_COA_ID">Overtime</label>
+                <div id="OVERTIME_COA_ID"></div>
+            </div>
+            <div class="col-xl-4 mb-1">
+                <label class="form-label" for="BONUS_COA_ID">Bonus</label>
+                <div id="BONUS_COA_ID"></div>
+            </div>
+            <div class="col-xl-4 mb-1">
+                <label class="form-label" for="INCOME_TAX_COA_ID">Income Tax</label>
+                <div id="INCOME_TAX_COA_ID"></div>
+            </div>
+            <div class="col-xl-4 mb-1">
+                <label class="form-label" for="LOAN_DEDUCTION_COA_ID">Loan Deduction</label>
+                <div id="LOAN_DEDUCTION_COA_ID"></div>
+            </div>
+            <div class="col-xl-4 mb-1">
+                <label class="form-label" for="ADVANCE_DEDUCTION_COA_ID">Advance Deduction</label>
+                <div id="ADVANCE_DEDUCTION_COA_ID"></div>
+            </div>
+            <span class="span name-validation"></span>
+            <div class="col-xl-12 text-end">
+                <button class="btn btn-danger btn-delete" style="display:none" id="BtnDelete"><i class="fa fa-trash"></i> Delete</button>
+                <button class="btn btn-primary btn-save" id="BtnSave"><i class="fa fa-save"></i> Save</button>
+            </div>
+        </div>
+    </div>
+    <!--  Extra Large modal example -->
+    <div class="modal fade bs-example-modal-xl" tabindex="-1" role="dialog" aria-labelledby="myExtraLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="myExtraLargeModalLabel">Quick Search</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="col-md-12">
+                        <div class="card text-left">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <div id="gridContainer"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+</div>
+@section LinkScriptSection{
+    <script type="text/javascript">
+        var Permissions = @Html.Raw(Json.Serialize(ViewBag.Permissions));
+    </script>
+    <script src="~/js/customjs/empr_SalaryHeads.js" asp-append-version="true"></script>
+    <script type="text/javascript">
+        $(function () {
+            empr_SalaryHeads.initEvents();
+        });
+    </script>
+}
