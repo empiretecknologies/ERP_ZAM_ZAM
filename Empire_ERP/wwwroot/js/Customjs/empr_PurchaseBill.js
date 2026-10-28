@@ -51,6 +51,7 @@ var empr_PurchaseBill = {
     CurrentStock: [],
     originalValues: {},
     ItemsOnParty: [],
+    bulkSuccessRecords: [],
     firstClick: 0,
     Parties: PartyType,
     CommissionTranId: 0,
@@ -77,8 +78,8 @@ var empr_PurchaseBill = {
 
             var Id = 0;
             empr_PurchaseBill.InitSalesman(Id);
+
             window.addEventListener('message', function (event) {
-                ////debugger;
                 if (event.origin !== window.location.origin) {
                     return;
                 }
@@ -90,31 +91,11 @@ var empr_PurchaseBill = {
                     empr_PurchaseBill.GetPurchaseBillByCode(data.traN_ID);
                 }
             });
-            //window.addEventListener("message", function (event) {
-            //    if (event.origin !== window.location.origin) return;
 
-            //    var data = event.data;
-
-            //    // Page Ready Check
-            //    if (data === "REQUEST_ID") {
-            //        // Sender se ID mangwana
-            //        window.opener.postMessage("SEND_ID", window.location.origin);
-            //        return;
-            //    }
-
-
-            //    if (data && data.traN_ID) {
-            //        $('#Code').val(data.traN_ID);
-            //        empr_PurchaseBill.GetPurchaseBillByCode(data.traN_ID);
-            //    }
-            //});
             $('body').on('click', '#GridSearch', function () {
                 if (empr_PurchaseBill.ValidateBarcode()) {
                     $('#BarcodePickModal').modal('show');
                     empr_PurchaseBill.InitBarcodePickGrid();
-                    //$('#BarcodePickModal').modal('show');
-
-
                 }
             });
 
@@ -125,40 +106,23 @@ var empr_PurchaseBill = {
             });
 
             $('body').on('click', '.elm_print', function () {
-                ////debugger;
+                
                 empr_helper.selectedBill = $(this).attr("reportid");
-                //var date = $(this).attr("reportdate");
                 empr_PurchaseBill.vdate = $(this).attr("reportdate");
                 empr_PurchaseBill.partyCode = $(this).attr("partyCode");
                 empr_PurchaseBill.actCode = $(this).attr("actCode");
                 empr_PurchaseBill.GeneratePrintReport();
             });
 
-            //$('body').on('click', '#pickItems', function () {
-            //    ////debugger;
-            //   if (empr_PurchaseBill.ValidateBarcode()) {
-            //        $('.bs-example-modal-lg').on('shown.bs.modal', function () {
-            //            ////debugger;
-            //            $(this).on('keydown', function (e) {
-            //                if (e.key === "Enter") {
-            //                    e.preventDefault();
-            //                    $('#BtnGetItems').click();
-            //                }
-            //            });
-            //        });
-
-            //    }
-            //});
 
             $('body').on('click', '#pickItems', function () {
-                ////debugger;
+                
                 if (empr_PurchaseBill.ValidateBarcode()) {
                     $('#pickItemModel').modal('show');
                 }
             });
             $('#pickItemModel').on('shown.bs.modal', function () {
-                ////debugger;
-
+                
                 $('#IQty').focus();
                 $(this).off('keydown').on('keydown', function (e) {
                     if (e.key === "Enter") {
@@ -183,7 +147,6 @@ var empr_PurchaseBill = {
             $('body').on('click', '.elm_copy', function () {
                 var id = $(this).attr("reportid");
                 var date = $(this).attr("reportdate");
-                ////debugger;
                 swal({
                     title: 'Are you sure you want to Copy this record?',
                     text: "",
@@ -376,6 +339,68 @@ var empr_PurchaseBill = {
 
                 empr_PurchaseBill.processBarcode();
             });
+
+            $('#BtnItemBulkUpload').click(function () {
+                empr_PurchaseBill.OpenBulkUploadModal();
+            });
+
+            $('#BtnDownloadItemBulkTemplate').click(function () {
+                empr_PurchaseBill.DownloadExcelTemplate();
+            });
+
+            $('#BtnSelectItemBulkFile').click(function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $('#ItemBulkUploadFile').click();
+            });
+
+            $('#itemBulkDropzone').on('click', function (e) {
+                if ($(e.target).closest('#BtnSelectItemBulkFile').length || $('#itemBulkBusy').hasClass('show')) {
+                    return;
+                }
+                $('#ItemBulkUploadFile').click();
+            });
+
+            $('#itemBulkDropzone').on('dragover', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(this).addClass('dragover');
+            });
+
+            $('#itemBulkDropzone').on('dragleave', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(this).removeClass('dragover');
+            });
+
+            $('#itemBulkDropzone').on('drop', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(this).removeClass('dragover');
+                if ($('#itemBulkBusy').hasClass('show')) {
+                    return;
+                }
+                var files = e.originalEvent.dataTransfer.files;
+                if (files && files.length > 0) {
+                    empr_PurchaseBill.HandleBulkExcelFile(files[0]);
+                }
+            });
+
+            $('#ItemBulkUploadFile').change(function () {
+                var file = this.files && this.files[0];
+                if (file) {
+                    empr_PurchaseBill.HandleBulkExcelFile(file);
+                }
+                $(this).val('');
+            });
+
+            $('#BtnItemBulkComplete').click(function () {
+                empr_PurchaseBill.CompleteBulkUpload();
+            });
+
+            $('#BtnItemBulkBack').click(function () {
+                empr_PurchaseBill.ResetBulkUploadModal();
+            });
         });
     },
 
@@ -398,7 +423,7 @@ var empr_PurchaseBill = {
             $('#NetAmount').val(netAmt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
         } else if (changedId === 'DISC') {
             var calculatedRate = (DISC / gridAmtSum) * 100;
-            $('#DISC_RATE').val(calculatedRate.toFixed(2));
+            $('#DISC_RATE').val(calculatedRate.toFixed(4));
             var netAmt = gridAmtSum - DISC;
             $('#NetAmount').val(netAmt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
         } else if (changedId === 'GRID') {
@@ -3365,6 +3390,9 @@ var empr_PurchaseBill = {
         //$('#CACT').dxSelectBox('instance').option('value', '');
         //$('#BACT').dxSelectBox('instance').option('value', '');
 
+        empr_PurchaseBill.ItemsOnParty = [];
+        empr_PurchaseBill.SetItemBulkUploadEnabled(false);
+
         $('#REF').focus();
         $('#pickItems').show();
         $('#V_DATE').val(todayDate);
@@ -3476,6 +3504,8 @@ var empr_PurchaseBill = {
             $('#acthidden').val('');
             $('#TERMS').val('');
             $('#PARTY_BALANCE').val('').css('color', '');
+            empr_PurchaseBill.ItemsOnParty = [];
+            empr_PurchaseBill.SetItemBulkUploadEnabled(false);
             empr_PurchaseBill.InitSalesman(0);
         }
         else {
@@ -3493,6 +3523,7 @@ var empr_PurchaseBill = {
 
             // item behalf on party
             empr_PurchaseBill.ItemsOnParty = [];
+            empr_PurchaseBill.SetItemBulkUploadEnabled(true);
             empr_PurchaseBill.ItemsBehalfOnParty(filteredData[0].partyCode, filteredData[0].accountCode);
 
 
@@ -3581,6 +3612,7 @@ var empr_PurchaseBill = {
 
                 grid.refresh();
             } else {
+                empr_PurchaseBill.ItemsOnParty = [];
                 empr_helper.notify(data.msg, data.msgType);
             }
         }, false, true);
@@ -4108,6 +4140,393 @@ var empr_PurchaseBill = {
                 empr_helper.notify(data.msg, data.msgType);
             }
         }, false, true);
+    },
+
+    SetItemBulkUploadEnabled: function (isEnabled) {
+        $('#BtnItemBulkUpload').prop('disabled', !isEnabled);
+    },
+    IsPartySelectedForBulkUpload: function () {
+        var partyCode = $('#partyhidden').val();
+        return partyCode !== '' && partyCode !== null && partyCode !== undefined && partyCode != 0;
+    },
+    FindBulkUploadItem: function (itemCode) {
+        if (typeof Items === 'undefined' || !Items || !Items.length) {
+            return null;
+        }
+        var code = String(itemCode || '').trim();
+        if (!code) {
+            return null;
+        }
+        var byKey = Items.find(function (u) {
+            return String(u.key) === code;
+        });
+        if (byKey) {
+            return byKey;
+        }
+        var codeUpper = code.toUpperCase();
+        return Items.find(function (u) {
+            return String(u.value || '').trim().toUpperCase() === codeUpper
+                || String(u.barcode || '').trim() === code
+                || String(u.barcode || '').endsWith(code);
+        }) || null;
+    },
+    OpenBulkUploadModal: function () {
+        if (!empr_PurchaseBill.IsPartySelectedForBulkUpload()) {
+            empr_helper.notify("Please select a Party before uploading items.", 2);
+            return;
+        }
+        empr_PurchaseBill.ResetBulkUploadModal();
+        $('#ItemBulkUploadModal').modal('show');
+    },
+    ResetBulkUploadModal: function () {
+        empr_PurchaseBill.SetBulkUploadBusy(false);
+        empr_PurchaseBill.bulkSuccessRecords = [];
+        $('#itemBulkFileName').text('');
+        $('#ItemBulkUploadFile').val('');
+        $('#BtnItemBulkComplete').hide().prop('disabled', false);
+        empr_PurchaseBill.SetBulkUploadStep(1);
+    },
+    SetBulkUploadBusy: function (isBusy) {
+        if (isBusy) {
+            $('#itemBulkBusy').addClass('show');
+            $('#BtnSelectItemBulkFile').prop('disabled', true);
+            $('#BtnDownloadItemBulkTemplate').prop('disabled', true);
+        } else {
+            $('#itemBulkBusy').removeClass('show');
+            $('#BtnSelectItemBulkFile').prop('disabled', false);
+            $('#BtnDownloadItemBulkTemplate').prop('disabled', false);
+        }
+    },
+    SetBulkUploadStep: function (step) {
+        $('.item-bulk-step').removeClass('active done');
+        $('#bulkStep1').hide();
+        $('#bulkStep2').hide();
+        $('#bulkStep' + step).show();
+        if (step == 2) {
+            $('#bulkStepLabel1').addClass('done');
+            $('#bulkStepLabel2').addClass('active');
+            $('#BtnItemBulkComplete').show();
+            $('#BtnItemBulkBack').show();
+        } else {
+            $('#bulkStepLabel1').addClass('active');
+            $('#BtnItemBulkComplete').hide();
+            $('#BtnItemBulkBack').hide();
+        }
+    },
+    DownloadExcelTemplate: function () {
+        if (typeof ExcelJS === 'undefined' || typeof saveAs === 'undefined') {
+            empr_helper.notify("Excel template could not be generated.", 2);
+            return;
+        }
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Item Bulk Upload');
+        worksheet.columns = [
+            { header: 'Item Code', key: 'ItemCode', width: 20 },
+            { header: 'Quantity', key: 'Quantity', width: 15 },
+            { header: 'Rate', key: 'Rate', width: 15 },
+            { header: 'Unit', key: 'Unit', width: 15 }
+        ];
+        worksheet.addRow({ ItemCode: '', Quantity: '', Rate: '', Unit: 'PCS' });
+        workbook.xlsx.writeBuffer().then(function (buffer) {
+            saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'PurchaseBillItemBulkUploadTemplate.xlsx');
+        });
+    },
+    HandleBulkExcelFile: function (file) {
+        if (!file) {
+            return;
+        }
+        if (!empr_PurchaseBill.IsPartySelectedForBulkUpload()) {
+            empr_helper.notify("Please select a Party before uploading items.", 2);
+            return;
+        }
+        var fileName = (file.name || '').toLowerCase();
+        if (fileName.indexOf('.xlsx') === -1 && fileName.indexOf('.xls') === -1) {
+            empr_helper.notify("Please select an Excel file.", 2);
+            return;
+        }
+        $('#itemBulkFileName').text(file.name);
+        empr_PurchaseBill.ProcessBulkExcelFile(file);
+    },
+    GetBulkCellText: function (cell) {
+        if (!cell || cell.value === null || cell.value === undefined) {
+            return '';
+        }
+        var value = cell.value;
+        if (typeof value === 'object') {
+            if (value.text !== undefined && value.text !== null) {
+                return String(value.text).trim();
+            }
+            if (value.result !== undefined && value.result !== null) {
+                return String(value.result).trim();
+            }
+            if (value.richText && value.richText.length) {
+                return value.richText.map(function (x) { return x.text; }).join('').trim();
+            }
+        }
+        return String(value).trim();
+    },
+    NormalizeBulkHeader: function (header) {
+        return (header || '').replace(/\s+/g, '').toLowerCase();
+    },
+    ProcessBulkExcelFile: function (file) {
+        if (typeof ExcelJS === 'undefined') {
+            empr_helper.notify("Excel processing is not available.", 2);
+            return;
+        }
+        empr_PurchaseBill.SetBulkUploadBusy(true);
+
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var workbook = new ExcelJS.Workbook();
+            workbook.xlsx.load(e.target.result).then(function () {
+                var worksheet = workbook.worksheets[0];
+                if (!worksheet) {
+                    empr_PurchaseBill.BulkProcessFailed("Excel sheet was not found.");
+                    return;
+                }
+                var headerRow = worksheet.getRow(1);
+                var columnMap = {};
+                headerRow.eachCell(function (cell, colNumber) {
+                    var header = empr_PurchaseBill.NormalizeBulkHeader(empr_PurchaseBill.GetBulkCellText(cell));
+                    if (header) {
+                        columnMap[header] = colNumber;
+                    }
+                });
+                if (!columnMap['itemcode'] || !columnMap['quantity'] || !columnMap['rate'] || !columnMap['unit']) {
+                    empr_PurchaseBill.BulkProcessFailed("Excel template must contain columns: Item Code, Quantity, Rate, Unit.");
+                    return;
+                }
+
+                var successRecords = [];
+                var failedRecords = [];
+                worksheet.eachRow(function (row, rowNumber) {
+                    if (rowNumber === 1) {
+                        return;
+                    }
+                    var itemCode = empr_PurchaseBill.GetBulkCellText(row.getCell(columnMap['itemcode']));
+                    var quantityText = empr_PurchaseBill.GetBulkCellText(row.getCell(columnMap['quantity']));
+                    var rateText = empr_PurchaseBill.GetBulkCellText(row.getCell(columnMap['rate']));
+                    var unitText = empr_PurchaseBill.GetBulkCellText(row.getCell(columnMap['unit']));
+                    if (itemCode === '' && quantityText === '' && rateText === '' && (unitText === '' || unitText.toUpperCase() === 'PCS')) {
+                        return;
+                    }
+
+                    var record = {
+                        RowNo: rowNumber,
+                        ItemCode: itemCode,
+                        Quantity: quantityText,
+                        Rate: rateText,
+                        Unit: unitText || 'PCS',
+                        ItemName: '',
+                        FailureReason: ''
+                    };
+
+                    if (itemCode === '') {
+                        record.FailureReason = "Item Code is required.";
+                        failedRecords.push(record);
+                        return;
+                    }
+
+                    var qty = parseFloat(quantityText);
+                    if (quantityText === '' || isNaN(qty) || qty <= 0) {
+                        record.FailureReason = "Quantity must be a number greater than 0.";
+                        failedRecords.push(record);
+                        return;
+                    }
+
+                    var selectedItem = empr_PurchaseBill.FindBulkUploadItem(itemCode);
+                    if (!selectedItem) {
+                        record.FailureReason = "Item not found in the database.";
+                        failedRecords.push(record);
+                        return;
+                    }
+
+                    var rate = 0;
+                    if (rateText !== '') {
+                        rate = parseFloat(rateText);
+                        if (isNaN(rate) || rate < 0) {
+                            record.FailureReason = "Rate must be a valid number.";
+                            failedRecords.push(record);
+                            return;
+                        }
+                    } else {
+                        rate = parseFloat(selectedItem.rate) || parseFloat(selectedItem.rRate) || 0;
+                    }
+
+                    var unitName = (unitText || 'PCS').trim();
+                    var selectedUnit = null;
+                    if (typeof Units !== 'undefined' && Units && Units.length) {
+                        selectedUnit = Units.find(function (u) {
+                            return String(u.value).toUpperCase() === unitName.toUpperCase()
+                                || String(u.key) === String(unitName);
+                        });
+                    }
+                    if (!selectedUnit) {
+                        record.FailureReason = "Unit '" + unitName + "' was not found.";
+                        failedRecords.push(record);
+                        return;
+                    }
+
+                    record.Quantity = qty;
+                    record.Rate = rate;
+                    record.Unit = selectedUnit.value || unitName;
+                    record.ItemName = selectedItem.value || '';
+                    record.ITEM_CODE = selectedItem.key;
+                    record.RATE = rate;
+                    record.UNIT = selectedUnit.key;
+                    record.AMT = Math.round(rate * qty);
+                    record.NET_AMT = Math.round(rate * qty);
+                    record.HS_CODE = selectedItem.hscode || '';
+                    record.ITEM_ID = selectedItem.itemID || selectedItem.iteM_ID || '';
+                    record.COLOR = selectedItem.color || 0;
+                    record.SIZE = selectedItem.size || 0;
+                    successRecords.push(record);
+                });
+
+                if (successRecords.length === 0 && failedRecords.length === 0) {
+                    empr_PurchaseBill.BulkProcessFailed("No records found in the Excel file.");
+                    return;
+                }
+
+                empr_PurchaseBill.ShowBulkReview(successRecords, failedRecords);
+            }).catch(function () {
+                empr_PurchaseBill.BulkProcessFailed("Unable to read the Excel file.");
+            });
+        };
+        reader.onerror = function () {
+            empr_PurchaseBill.BulkProcessFailed("Unable to read the Excel file.");
+        };
+        reader.readAsArrayBuffer(file);
+    },
+    BulkProcessFailed: function (message) {
+        empr_PurchaseBill.SetBulkUploadBusy(false);
+        empr_PurchaseBill.SetBulkUploadStep(1);
+        empr_helper.notify(message, 2);
+    },
+    ShowBulkReview: function (successRecords, failedRecords) {
+        empr_PurchaseBill.SetBulkUploadBusy(false);
+        empr_PurchaseBill.bulkSuccessRecords = successRecords || [];
+        var failed = failedRecords || [];
+        $('#bulkSuccessCount').text(empr_PurchaseBill.bulkSuccessRecords.length);
+        $('#bulkFailedCount').text(failed.length);
+        var mapRow = function (r) {
+            return {
+                rowNo: r.RowNo,
+                itemCode: r.ItemCode || '',
+                itemName: r.ItemName || '',
+                quantity: r.Quantity,
+                rate: r.Rate,
+                unit: r.Unit || 'PCS',
+                failureReason: r.FailureReason || ''
+            };
+        };
+        var successCols = [
+            { dataField: 'rowNo', caption: 'Row', width: 70 },
+            { dataField: 'itemCode', caption: 'Item Code', width: 120 },
+            { dataField: 'itemName', caption: 'Item Name' },
+            { dataField: 'quantity', caption: 'Quantity', width: 100 },
+            { dataField: 'rate', caption: 'Rate', width: 100 },
+            { dataField: 'unit', caption: 'Unit', width: 100 }
+        ];
+        var failedCols = [
+            { dataField: 'rowNo', caption: 'Row', width: 70 },
+            { dataField: 'itemCode', caption: 'Item Code', width: 120 },
+            { dataField: 'itemName', caption: 'Item Name' },
+            { dataField: 'quantity', caption: 'Quantity', width: 100 },
+            { dataField: 'rate', caption: 'Rate', width: 100 },
+            { dataField: 'unit', caption: 'Unit', width: 100 },
+            { dataField: 'failureReason', caption: 'Failure Reason' }
+        ];
+        empr_helper.dxGridbindingWithoutFeatures('#bulkSuccessGrid', successCols, empr_PurchaseBill.bulkSuccessRecords.map(mapRow), 'BulkSuccess', 'none');
+        empr_helper.dxGridbindingWithoutFeatures('#bulkFailedGrid', failedCols, failed.map(mapRow), 'BulkFailed', 'none');
+        empr_PurchaseBill.SetBulkUploadStep(2);
+        if (empr_PurchaseBill.bulkSuccessRecords.length === 0) {
+            $('#BtnItemBulkComplete').hide();
+        }
+    },
+    CompleteBulkUpload: function () {
+        if (!empr_PurchaseBill.IsPartySelectedForBulkUpload()) {
+            empr_helper.notify("Please select a Party before uploading items.", 2);
+            return;
+        }
+        if (!empr_PurchaseBill.bulkSuccessRecords || empr_PurchaseBill.bulkSuccessRecords.length === 0) {
+            empr_helper.notify("No valid records to add.", 2);
+            return;
+        }
+
+        const gridInstance = $('#DetailContainer').dxDataGrid('instance');
+        if (!gridInstance) {
+            empr_helper.notify("Detail grid is not available.", 2);
+            return;
+        }
+
+        gridInstance.saveEditData().done(function () {
+            var dataSource = gridInstance.option("dataSource") || [];
+            var IsDataAvailableInGrid = false;
+
+            $.each(dataSource, function (index, item) {
+                if (item.iteM_CODE != "" && item.iteM_CODE != null && item.iteM_CODE != undefined) {
+                    IsDataAvailableInGrid = true;
+                    return false;
+                }
+            });
+
+            var newRows = empr_PurchaseBill.bulkSuccessRecords.map(function (record) {
+                var stockRecord = empr_PurchaseBill.CurrentStock.find(function (s) {
+                    return s.itemId == record.ITEM_CODE;
+                });
+                var qty = parseFloat(record.Quantity) || 0;
+                var rate = parseFloat(record.RATE) || 0;
+                var amt = Math.round(rate * qty);
+                var unitKey = record.UNIT;
+                if (unitKey === undefined || unitKey === null || unitKey === '') {
+                    if (typeof Units !== 'undefined' && Units && Units.length) {
+                        var pcsUnit = Units.find(function (u) {
+                            return String(u.value).toUpperCase() === 'PCS';
+                        });
+                        unitKey = pcsUnit ? pcsUnit.key : (Units[0] ? Units[0].key : 0);
+                    } else {
+                        unitKey = 0;
+                    }
+                }
+                return {
+                    __KEY__: empr_PurchaseBill.GenerateKey(36),
+                    dT_CODE: 0,
+                    iteM_CODE: record.ITEM_CODE,
+                    iteM_ID: record.ITEM_ID || '',
+                    qty: qty,
+                    qtY2: qty,
+                    baL_QTY: qty,
+                    unit: unitKey,
+                    rate: rate,
+                    amt: amt,
+                    disc: 0,
+                    disC_AMT: 0,
+                    tax: 0,
+                    taX_AMT: 0,
+                    neT_AMT: amt,
+                    hS_CODE: record.HS_CODE || '',
+                    color: record.COLOR || 0,
+                    size: record.SIZE || 0,
+                    stock: stockRecord ? (parseFloat(stockRecord.balance) || 0) : 0,
+                    chk: "0",
+                    chK1: false
+                };
+            });
+
+            if (IsDataAvailableInGrid) {
+                dataSource.unshift(...newRows);
+                gridInstance.option("dataSource", dataSource);
+            } else {
+                gridInstance.option("dataSource", newRows);
+            }
+            gridInstance.refresh();
+            empr_PurchaseBill.SetDiscount('GRID');
+
+            $('#ItemBulkUploadModal').modal('hide');
+            empr_PurchaseBill.ResetBulkUploadModal();
+            empr_helper.notify(newRows.length + " item(s) added to detail grid.", 1);
+        });
     },
 
 }

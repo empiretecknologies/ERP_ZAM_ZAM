@@ -517,7 +517,7 @@
                 { dataField: 'credit', caption: 'Credit', dataType: 'number', width: 120 },
                 {
                     dataField: 'balance',
-                    caption: 'Balance',
+                    caption: 'Balance ',
                     dataType: 'number',
                     width: 120,
                     calculateCellValue: function (data) {

@@ -412,6 +412,9 @@ namespace Empire_ERP.Helpers
 
             services.AddScoped<IInvoiceReportsService, InvoiceReportsService>();
             services.AddScoped<IInvoiceReportsRepository, InvoiceReportsRepository>();
+
+            services.AddScoped<ICustomerAttendanceService, CustomerAttendanceService>();
+            services.AddScoped<ICustomerAttendanceRepository, CustomerAttendanceRepository>();
         }
     }
 }

@@ -8848,16 +8848,16 @@
                             return e.value === 0 ? "" : e.value.toLocaleString('en-US');
                         }
                     },
-                    {
-                        column: "balance",
-                        summaryType: "sum",
-                        displayFormat: "{0}",
-                        showInGroupFooter: true,
-                        valueFormat: '#,##0',
-                        customizeText: function (e) {
-                            return e.value === 0 ? "" : e.value.toLocaleString('en-US');
-                        }
-                    },
+                    //{
+                    //    column: "balance",
+                    //    summaryType: "sum",
+                    //    displayFormat: "{0}",
+                    //    showInGroupFooter: true,
+                    //    valueFormat: '#,##0',
+                    //    customizeText: function (e) {
+                    //        return e.value === 0 ? "" : e.value.toLocaleString('en-US');
+                    //    }
+                    //},
                     {
                         column: "balanced",
                         summaryType: "sum",
