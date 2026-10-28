@@ -57,6 +57,8 @@ namespace Empire_ERP.Infrastructure.Repositories
                                             FORMAT(ICT.punch_time, 'hh:mm:ss tt') AS PUNCH_TIME
                                             FROM {table} ICT
                                             LEFT OUTER JOIN TBL_EMP_REG E ON E.MACHINE_ID = ICT.emp_code
+                                            WHERE ICT.punch_time >= '{fromDate}'
+                                            AND ICT.punch_time < DATEADD(DAY, 1, '{toDate}')
                                             ORDER BY ICT.punch_time DESC";
 
                         SqlCommand command = new SqlCommand(query, connection);

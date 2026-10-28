@@ -1,4 +1,109 @@
-﻿<div class="card">
+﻿<style>
+    .attendance-filter-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 0;
+    }
+
+    .attendance-filter-box {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #fff;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        padding: 4px 10px;
+        min-height: 32px;
+        height: 32px;
+        box-sizing: border-box;
+    }
+
+    .attendance-filter-box .filter-icon {
+        color: #055a87;
+        font-size: 12px;
+        flex-shrink: 0;
+    }
+
+    .attendance-filter-box input[type="date"],
+    .attendance-filter-box select {
+        border: none;
+        background: transparent;
+        outline: none;
+        color: #212529;
+        font-size: 13px;
+        font-weight: 500;
+        line-height: 1.2;
+        box-sizing: border-box;
+    }
+
+    .attendance-filter-box input[type="date"] {
+        width: 118px;
+        padding: 0;
+        pointer-events: none;
+    }
+
+    .attendance-filter-box input[type="date"]:disabled {
+        background: transparent;
+        opacity: 1;
+        -webkit-text-fill-color: #212529;
+        color: #212529;
+    }
+
+    .attendance-filter-box.duration-box {
+        width: 128px;
+        min-width: 128px;
+        max-width: 128px;
+        padding-right: 8px;
+    }
+
+    .attendance-filter-box select#DURATION {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        height: 100%;
+        padding: 0 18px 0 0;
+        margin: 0;
+        cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-color: transparent;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23055a87' d='M1 1l4 4 4-4'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 2px center;
+        background-size: 10px 6px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+    .attendance-filter-box .date-sep {
+        color: #6c757d;
+        margin: 0 2px;
+        flex-shrink: 0;
+        font-size: 13px;
+    }
+
+    .attendance-filter-btn {
+        border-radius: 6px;
+        height: 32px;
+        min-height: 32px;
+        padding: 4px 12px;
+        font-size: 13px;
+        line-height: 1.2;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .attendance-filter-btn i {
+        font-size: 12px;
+    }
+</style>
+
+<div class="card">
     <div class="card-header">
         
     </div>
@@ -6,21 +111,27 @@
     <div class="card-header">
         <input class="form-control" id="HIDDEN_FROM_DATE" type="hidden" value="@ViewBag.StartDate" autocomplete="off">
         <input class="form-control" id="HIDDEN_TO_DATE" type="hidden" value="@ViewBag.EndDate" autocomplete="off">
-        <div class="row d-none">
-            <div class="col-xl-3">
-                <label class="form-label" for="FROM_DATE">From Date:</label>
-                <input class="form-control" id="FROM_DATE" type="date" value="@ViewBag.StartDate" autocomplete="off">
+        <div class="attendance-filter-bar">
+            <div class="attendance-filter-box">
+                <i class="fa fa-calendar filter-icon"></i>
+                <input id="FROM_DATE" type="date" value="@DateTime.Now.ToString("yyyy-MM-dd")" autocomplete="off" disabled>
+                <span class="date-sep">–</span>
+                <input id="TO_DATE" type="date" value="@DateTime.Now.ToString("yyyy-MM-dd")" autocomplete="off" disabled>
             </div>
-            <div class="col-xl-3">
-                <label class="form-label" for="TO_DATE">To Date:</label>
-                <input class="form-control" id="TO_DATE" type="date"
-                       value="@ViewBag.EndDate" autocomplete="off">
+            <div class="attendance-filter-box duration-box">
+                <select id="DURATION">
+                    <option value="today" selected>Today</option>
+                    <option value="yesterday">Yesterday</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                </select>
             </div>
-            <div class="col-xl-6">
-                <button type="button" class="btn btn-primary btn-download waves-effect waves-light float-end" id="BtnDownload">
-                    Download Attendance
-                </button>
-            </div>
+            <button type="button" class="btn btn-primary attendance-filter-btn" id="BtnFilter">
+                <i class="fa fa-filter"></i> Filter
+            </button>
+            <button type="button" class="btn btn-outline-primary attendance-filter-btn d-none" id="BtnDownload">
+                Download Attendance
+            </button>
         </div>
     </div>
     <div class="row">
@@ -147,6 +258,8 @@
     <script type="text/javascript">
         var Permissions = @Html.Raw(Json.Serialize(ViewBag.Permissions));
         var periodStartDate = @Html.Raw(Json.Serialize(ViewBag.StartDate));
+        empr_helper.companyName = @Html.Raw(Json.Serialize(ViewBag.Company));
+        empr_helper.reportName = @Html.Raw(Json.Serialize(ViewBag.MENU_NAME)) || "Customer Attendance";
         console.log(periodStartDate)
         $(function () {
             empr_CustomerAttendance.InitEvents();
