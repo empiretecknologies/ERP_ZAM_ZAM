@@ -1,0 +1,329 @@
+@{
+    var now = DateTime.Now;
+    var currentMonth = now.Month;
+    var currentYear = now.Year;
+}
+<style>
+    .salary-gen-page .card {
+        border: 1px solid #d9e3ec;
+        box-shadow: 0 4px 14px rgba(5, 90, 135, 0.08);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .salary-gen-page .card-header {
+        background: #fff;
+        border-bottom: 1px solid #e5edf3;
+        padding: 16px 18px;
+    }
+
+    .salary-gen-page .card-header .form-label {
+        color: #055a87;
+        font-weight: 600;
+        margin-bottom: 6px;
+    }
+
+    .salary-gen-page .card-header .form-select {
+        min-height: 40px;
+        border-radius: 8px;
+        border: 1px solid #c5d5e2;
+        color: #334155;
+    }
+
+    .salary-gen-page .card-header .form-select:focus {
+        border-color: #055a87;
+        box-shadow: 0 0 0 0.2rem rgba(5, 90, 135, 0.15);
+    }
+
+    .salary-gen-page .sg-actions {
+        display: flex;
+        justify-content: flex-end;
+        align-items: end;
+        gap: 10px;
+        height: 100%;
+        padding-bottom: 1px;
+    }
+
+    .salary-gen-page #BtnRefresh {
+        min-height: 40px;
+        min-width: 42px;
+        border-radius: 8px;
+        background: #fff;
+        color: #055a87;
+        border: 1px solid #055a87;
+    }
+
+    .salary-gen-page #BtnRefresh:hover {
+        background: #055a87;
+        color: #fff;
+    }
+
+    .salary-gen-page #BtnGenerate {
+        min-height: 40px;
+        border-radius: 8px;
+        font-weight: 600;
+        padding: 0 18px;
+        background: #055a87 !important;
+        border-color: #055a87 !important;
+        color: #fff !important;
+        box-shadow: 0 4px 12px rgba(5, 90, 135, 0.28);
+    }
+
+    .salary-gen-page #BtnGenerate:hover:not(:disabled) {
+        background: #044a6f !important;
+        border-color: #044a6f !important;
+    }
+
+    .salary-gen-page #BtnGenerate:disabled {
+        background: #9bb7c8 !important;
+        border-color: #9bb7c8 !important;
+        color: #fff !important;
+        box-shadow: none;
+        cursor: not-allowed;
+    }
+
+    .salary-gen-page .card-body {
+        padding: 14px;
+        background: #f7fafc;
+    }
+
+    .salary-gen-page #gridContainer {
+        background: #fff;
+        border-radius: 10px;
+        padding: 6px;
+        border: 1px solid #e5edf3;
+    }
+
+    .salary-gen-page .dx-datagrid-headers {
+        background: #055a87 !important;
+    }
+
+    .salary-gen-page .dx-datagrid-headers .dx-header-row > td,
+    .salary-gen-page .dx-datagrid-headers .dx-header-row > td .dx-datagrid-text-content {
+        color: #fff !important;
+        font-weight: 600;
+    }
+
+    .salary-gen-page .dx-datagrid .dx-row-alt > td {
+        background-color: #f3f8fb !important;
+    }
+
+    /* Hide grid refresh button only on this form */
+    .salary-gen-page #gridContainer .dx-datagrid-header-panel .dx-toolbar-item:has(.dx-icon-refresh) {
+        display: none !important;
+    }
+
+    .salary-gen-page .sg-badge {
+        display: inline-block;
+        min-width: 42px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 12px;
+        text-align: center;
+    }
+
+    .salary-gen-page .sg-badge-present {
+        background: #e8f5e9;
+        color: #1b5e20;
+        cursor: pointer;
+        border: 1px solid #a5d6a7;
+    }
+
+    .salary-gen-page .sg-badge-absent {
+        background: #ffebee;
+        color: #b71c1c;
+    }
+
+    .salary-gen-page .sg-badge-off {
+        background: #fff3e0;
+        color: #e65100;
+    }
+
+    .salary-gen-page .sg-badge-working {
+        background: #e3f2fd;
+        color: #055a87;
+    }
+
+    .salary-gen-page .sg-net {
+        font-weight: 700;
+        color: #055a87;
+    }
+
+    .salary-gen-loader {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(5, 90, 135, 0.35);
+        backdrop-filter: blur(3px);
+    }
+
+    .salary-gen-loader.active {
+        display: flex;
+    }
+
+    .salary-gen-loader-box {
+        width: 280px;
+        background: #fff;
+        border-radius: 18px;
+        padding: 28px 24px 22px;
+        text-align: center;
+        box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+    }
+
+    .salary-gen-loader-ring {
+        --sg-progress: 0;
+        width: 140px;
+        height: 140px;
+        margin: 0 auto 16px;
+        border-radius: 50%;
+        background: conic-gradient(#055a87 calc(var(--sg-progress) * 1%), #e3eaf3 0);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .salary-gen-loader-ring::before {
+        content: "";
+        position: absolute;
+        inset: 12px;
+        border-radius: 50%;
+        background: #fff;
+    }
+
+    .salary-gen-loader-percent {
+        position: relative;
+        z-index: 1;
+        font-size: 28px;
+        font-weight: 800;
+        color: #055a87;
+    }
+
+    .salary-gen-loader-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #055a87;
+        margin-bottom: 4px;
+    }
+
+    .salary-gen-loader-sub {
+        font-size: 13px;
+        color: #607d8b;
+    }
+
+    #sgAttendancePopover {
+        display: none;
+        position: fixed;
+        z-index: 100000;
+        width: 260px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 12px 30px rgba(5, 90, 135, 0.22);
+        border: 1px solid #dbe5f0;
+        padding: 10px 10px 6px;
+        pointer-events: none;
+    }
+
+    #sgAttendancePopover .sg-pop-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #055a87;
+        margin-bottom: 4px;
+        padding: 0 4px;
+    }
+
+    #sgAttendanceChart {
+        width: 100%;
+        height: 180px;
+    }
+</style>
+
+<div class="card salary-gen-page">
+    <div class="card-header">
+        <div class="row align-items-end">
+            <div class="col-xl-2 col-md-4 mb-2 mb-xl-0">
+                <label class="form-label" for="SALARY_MONTH">Month:</label>
+                <select class="form-select" id="SALARY_MONTH">
+                    @for (int m = 1; m <= 12; m++)
+                    {
+                        var monthName = new DateTime(2000, m, 1).ToString("MMMM");
+                        if (m == currentMonth)
+                        {
+                            <option value="@m" selected>@monthName</option>
+                        }
+                        else
+                        {
+                            <option value="@m">@monthName</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-xl-2 col-md-4 mb-2 mb-xl-0">
+                <label class="form-label" for="SALARY_YEAR">Year:</label>
+                <select class="form-select" id="SALARY_YEAR">
+                    @for (int y = currentYear - 5; y <= currentYear + 1; y++)
+                    {
+                        if (y == currentYear)
+                        {
+                            <option value="@y" selected>@y</option>
+                        }
+                        else
+                        {
+                            <option value="@y">@y</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-xl-8 col-md-4">
+                <div class="sg-actions">
+                    <button type="button" class="btn" id="BtnRefresh" title="Refresh">
+                        <i class="fa fa-refresh"></i>
+                    </button>
+                    <button type="button" class="btn btn-primary" id="BtnGenerate">
+                        <i class="fa fa-cogs"></i> Salary Generate
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body Record">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="table-responsive">
+                    <div id="gridContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="salary-gen-loader" id="salaryGenLoader">
+    <div class="salary-gen-loader-box">
+        <div class="salary-gen-loader-ring" id="salaryGenRing">
+            <div class="salary-gen-loader-percent" id="salaryGenPercent">0%</div>
+        </div>
+        <div class="salary-gen-loader-title">Generating Salary</div>
+        <div class="salary-gen-loader-sub">Please wait while payroll is being processed...</div>
+    </div>
+</div>
+
+<div id="sgAttendancePopover">
+    <div class="sg-pop-title" id="sgAttendanceTitle">Attendance</div>
+    <div id="sgAttendanceChart"></div>
+</div>
+
+@section LinkScriptSection{
+    <script type="text/javascript">
+        var Permissions = @Html.Raw(Json.Serialize(ViewBag.Permissions));
+    </script>
+    <script src="~/js/customjs/empr_SalaryGenerate.js" asp-append-version="true"></script>
+    <script type="text/javascript">
+        $(function () {
+            empr_SalaryGenerate.initEvents();
+        });
+    </script>
+}

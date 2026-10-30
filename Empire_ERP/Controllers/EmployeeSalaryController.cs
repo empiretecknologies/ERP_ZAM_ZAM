@@ -57,5 +57,19 @@ namespace Empire_ERP.Controllers
                 throw ex;
             }
         }
+
+        [HttpPost]
+        public JsonResult Delete(int id)
+        {
+            try
+            {
+                var data = _employeeSalaryService.Delete(id, CommonHelper.GetValues(HttpContext));
+                return Json(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }

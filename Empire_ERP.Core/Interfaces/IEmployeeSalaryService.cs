@@ -7,5 +7,6 @@ namespace Empire_ERP.Core.Interfaces
         MyHttpResponseMessage QuickSearch(Common common);
         MyHttpResponseMessage GetEmployeeSalaryByEmployeeId(int employeeId, Common common);
         MyHttpResponseMessage Save(CustomEmployeeSalary model, Common common);
+        MyHttpResponseMessage Delete(int id, Common common);
     }
 }

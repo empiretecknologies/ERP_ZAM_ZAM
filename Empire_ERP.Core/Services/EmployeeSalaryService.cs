@@ -35,5 +35,10 @@ namespace Empire_ERP.Core.Services
             }
             return _employeeSalaryRepository.Save(model, common);
         }
+
+        public MyHttpResponseMessage Delete(int id, Common common)
+        {
+            return _employeeSalaryRepository.Delete(id, common);
+        }
     }
 }

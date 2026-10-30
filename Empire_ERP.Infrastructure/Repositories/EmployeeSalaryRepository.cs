@@ -274,6 +274,60 @@ namespace Empire_ERP.Infrastructure.Repositories
             return response;
         }
 
+        public MyHttpResponseMessage Delete(int id, Common common)
+        {
+            MyHttpResponseMessage response = new MyHttpResponseMessage();
+            response.msg = "Data not found in our records";
+            try
+            {
+                var Menu = _menuRepository.GetMenu(common.MenuID);
+                string? table = string.Empty;
+                if (Menu.data != null)
+                {
+                    var menu = (Menu)Menu.data;
+                    table = menu.TABLE1;
+                }
+
+                if (!String.IsNullOrWhiteSpace(table))
+                {
+                    if (id == 0)
+                    {
+                        response.msg = "ID is not in numeric format";
+                        response.msgType = 2;
+                    }
+                    else
+                    {
+                        string connectionString = new SQLService().getconnstring();
+                        using (SqlConnection connection = new SqlConnection(connectionString))
+                        {
+                            connection.Open();
+                            string query = "UPDATE " + table + " SET DLT = 'F' WHERE ID = '" + id + "' AND MENU_ID = '" + common.MenuID + "'";
+                            SqlCommand command = new SqlCommand(query, connection);
+                            command.ExecuteNonQuery();
+                            response.msg = "Record Deleted Successfully";
+                            response.msgType = 1;
+                        }
+                    }
+                }
+                else
+                {
+                    response.msg = "Something went wrong! please try again later.";
+                    response.msgType = 2;
+                }
+            }
+            catch (Exception ex)
+            {
+                string _catchMessage = ex.Message;
+                if (ex.InnerException != null)
+                {
+                    _catchMessage += "<br/>" + ex.InnerException.Message;
+                }
+                response.msg = _catchMessage;
+                response.msgType = 2;
+            }
+            return response;
+        }
+
         private string SqlNumber(double? value)
         {
             if (value == null)

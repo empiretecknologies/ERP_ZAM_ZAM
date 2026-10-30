@@ -107,6 +107,9 @@ namespace Empire_ERP.Helpers
             services.AddScoped<ISetupTypeService, SetupTypeService>();
             services.AddScoped<ISetupTypeRepository, SetupTypeRepository>();
 
+            services.AddScoped<IDepartmentsService, DepartmentsService>();
+            services.AddScoped<IDepartmentsRepository, DepartmentsRepository>();
+
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IUserRepository, UserRepository>();
 
@@ -247,6 +250,9 @@ namespace Empire_ERP.Helpers
 
             services.AddScoped<IEmployeeSalaryService, EmployeeSalaryService>();
             services.AddScoped<IEmployeeSalaryRepository, EmployeeSalaryRepository>();
+
+            services.AddScoped<ISalaryGenerateService, SalaryGenerateService>();
+            services.AddScoped<ISalaryGenerateRepository, SalaryGenerateRepository>();
 
             services.AddScoped<IEmployeeAdvanceService, EmployeeAdvanceService>();
             services.AddScoped<IEmployeeAdvanceRepository, EmployeeAdvanceRepository>();
