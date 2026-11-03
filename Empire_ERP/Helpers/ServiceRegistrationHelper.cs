@@ -254,11 +254,17 @@ namespace Empire_ERP.Helpers
             services.AddScoped<ISalaryGenerateService, SalaryGenerateService>();
             services.AddScoped<ISalaryGenerateRepository, SalaryGenerateRepository>();
 
+            services.AddScoped<ISalaryDisbursementService, SalaryDisbursementService>();
+            services.AddScoped<ISalaryDisbursementRepository, SalaryDisbursementRepository>();
+
             services.AddScoped<IEmployeeAdvanceService, EmployeeAdvanceService>();
             services.AddScoped<IEmployeeAdvanceRepository, EmployeeAdvanceRepository>();
 
             services.AddScoped<IEmployeeLoanService, EmployeeLoanService>();
             services.AddScoped<IEmployeeLoanRepository, EmployeeLoanRepository>();
+
+            services.AddScoped<IEmpManualAttService, EmpManualAttService>();
+            services.AddScoped<IEmpManualAttRepository, EmpManualAttRepository>();
             
             services.AddScoped<IAttendanceMachineService, AttendanceMachineService>();
             services.AddScoped<IAttendanceMachineRepository, AttendanceMachineRepository>();

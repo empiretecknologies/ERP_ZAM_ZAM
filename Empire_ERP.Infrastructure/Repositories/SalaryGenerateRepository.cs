@@ -35,15 +35,24 @@ namespace Empire_ERP.Infrastructure.Repositories
                     return response;
                 }
 
+                DateTime payrollMonth = new DateTime(model.FROM_DATE.Value.Year, model.FROM_DATE.Value.Month, 1);
+                if (IsFuturePayrollMonth(payrollMonth))
+                {
+                    response.msg = "This month is not eligible for Salary Generate.";
+                    response.msgType = 2;
+                    return response;
+                }
+
                 string fromDate = model.FROM_DATE.Value.ToString("yyyy-MM-dd");
                 string toDate = model.TO_DATE.Value.ToString("yyyy-MM-dd");
-                DateTime salaryMonth = new DateTime(model.FROM_DATE.Value.Year, model.FROM_DATE.Value.Month, 1);
-                bool isGenerated = IsSalaryAlreadyGenerated(salaryMonth);
+                string payrollMonthText = payrollMonth.ToString("MMMM yyyy", CultureInfo.InvariantCulture);
+                bool isGenerated = IsSalaryAlreadyGenerated(payrollMonthText);
 
                 List<SalaryGenerate> rows = GetSalaryFromSp(fromDate, toDate, model.FROM_DATE, model.TO_DATE);
                 foreach (var row in rows)
                 {
                     row.IS_GENERATED = isGenerated;
+                    row.PAYROLL_MONTH = payrollMonthText;
                 }
 
                 response.data = new
@@ -81,8 +90,16 @@ namespace Empire_ERP.Infrastructure.Repositories
                     return response;
                 }
 
-                DateTime salaryMonth = new DateTime(model.FROM_DATE.Value.Year, model.FROM_DATE.Value.Month, 1);
-                if (IsSalaryAlreadyGenerated(salaryMonth))
+                DateTime payrollMonth = new DateTime(model.FROM_DATE.Value.Year, model.FROM_DATE.Value.Month, 1);
+                if (IsFuturePayrollMonth(payrollMonth))
+                {
+                    response.msg = "This month is not eligible for Salary Generate.";
+                    response.msgType = 2;
+                    return response;
+                }
+
+                string payrollMonthText = payrollMonth.ToString("MMMM yyyy", CultureInfo.InvariantCulture);
+                if (IsSalaryAlreadyGenerated(payrollMonthText))
                 {
                     response.msg = "Salary already generated for this month.";
                     response.msgType = 2;
@@ -91,7 +108,6 @@ namespace Empire_ERP.Infrastructure.Repositories
 
                 string fromDate = model.FROM_DATE.Value.ToString("yyyy-MM-dd");
                 string toDate = model.TO_DATE.Value.ToString("yyyy-MM-dd");
-                string salaryMonthStr = salaryMonth.ToString("yyyy-MM-dd");
                 var Ip = common.IPAddress;
                 var Computer = common.ComputerName;
                 var Postal = common.PostalCode;
@@ -107,8 +123,6 @@ namespace Empire_ERP.Infrastructure.Repositories
                     return response;
                 }
 
-                ResolveEmployeeIds(rows);
-
                 using (SqlConnection connection = new SqlConnection(new SQLService().getconnstring()))
                 {
                     connection.Open();
@@ -117,27 +131,27 @@ namespace Empire_ERP.Infrastructure.Repositories
                     command.Transaction = transaction;
                     try
                     {
-                        command.CommandText = "SELECT ISNULL(MAX(ID), 0) FROM " + TableName;
-                        int nextId = Convert.ToInt32(command.ExecuteScalar());
-
                         foreach (var item in rows)
                         {
-                            nextId++;
-                            double incomeTax = item.INCOME_TAX ?? 0;
-                            double loanDeduction = item.LOAN_INSTALLMENT ?? 0;
-                            double advanceDeduction = item.TOTAL_ADVANCE ?? 0;
-                            double otherDeduction = item.ABSENT_DEDUCTION ?? 0;
-                            double totalDeduction = incomeTax + loanDeduction + advanceDeduction + otherDeduction;
-
                             command.CommandText = "INSERT INTO " + TableName + " " +
-                                "(ID,EMPLOYEE_ID,SALARY_MONTH,BASIC_SALARY,HOUSE_ALLOWANCE,MEDICAL_ALLOWANCE,CONVEYANCE_ALLOWANCE," +
-                                "OVERTIME,BONUS,GROSS_SALARY,INCOME_TAX,LOAN_DEDUCTION,ADVANCE_DEDUCTION,OTHER_DEDUCTION," +
-                                "TOTAL_DEDUCTION,NET_SALARY,GENERATED_DATE," +
+                                "(EMP_PIC,MACHINE_ID,EMPLOYEE_CODE,EMP_NAME,DESIGNATION,DEPARTMENT,PAYROLL_MONTH," +
+                                "PRESENT_DAYS,SUNDAY_DAYS,WORKING_DAYS,ABSENT_DAYS," +
+                                "BASIC_SALARY,HOUSE_ALLOWANCE,MEDICAL_ALLOWANCE,CONVEYANCE_ALLOWANCE," +
+                                "OVERTIME,BONUS,GROSS_SALARY,PER_DAY_SALARY,ABSENT_DEDUCTION," +
+                                "INCOME_TAX,TOTAL_ADVANCE,LOAN_INSTALLMENT,TOTAL_LATE_HOURS,AVG_IN_TIME,NET_SALARY," +
                                 "ADD_USER_ID,ADD_DATE,ADD_COMPUTER_NAME,ADD_IP_ADDRESS,EDIT_USER_ID,EDIT_DATE,EDIT_COMPUTER_NAME," +
                                 "EDIT_IP_ADDRESS,ADD_POSTALCODE,EDIT_POSTALCODE,ASTATUS,MENU_ID,DLT) VALUES (" +
-                                nextId + "," +
-                                SqlNumber(item.EMPLOYEE_ID) + "," +
-                                "'" + salaryMonthStr + "'," +
+                                SqlString(item.EMP_PIC) + "," +
+                                SqlInt(item.MACHINE_ID) + "," +
+                                SqlInt(item.EMPLOYEE_CODE) + "," +
+                                SqlString(item.EMP_NAME) + "," +
+                                SqlString(item.DESIGNATION) + "," +
+                                SqlString(item.DEPARTMENT) + "," +
+                                SqlString(payrollMonthText) + "," +
+                                SqlInt(item.PRESENT_DAYS) + "," +
+                                SqlInt(item.SUNDAY_DAYS) + "," +
+                                SqlInt(item.WORKING_DAYS) + "," +
+                                SqlInt(item.ABSENT_DAYS) + "," +
                                 SqlNumber(item.BASIC_SALARY) + "," +
                                 SqlNumber(item.HOUSE_ALLOWANCE) + "," +
                                 SqlNumber(item.MEDICAL_ALLOWANCE) + "," +
@@ -145,13 +159,14 @@ namespace Empire_ERP.Infrastructure.Repositories
                                 SqlNumber(item.OVERTIME) + "," +
                                 SqlNumber(item.BONUS) + "," +
                                 SqlNumber(item.GROSS_SALARY) + "," +
-                                SqlNumber(incomeTax) + "," +
-                                SqlNumber(loanDeduction) + "," +
-                                SqlNumber(advanceDeduction) + "," +
-                                SqlNumber(otherDeduction) + "," +
-                                SqlNumber(totalDeduction) + "," +
+                                SqlNumber(item.PER_DAY_SALARY) + "," +
+                                SqlNumber(item.ABSENT_DEDUCTION) + "," +
+                                SqlNumber(item.INCOME_TAX) + "," +
+                                SqlNumber(item.TOTAL_ADVANCE) + "," +
+                                SqlNumber(item.LOAN_INSTALLMENT) + "," +
+                                SqlString(item.TOTAL_LATE_HOURS) + "," +
+                                SqlTime(item.AVG_IN_TIME) + "," +
                                 SqlNumber(item.NET_SALARY) + "," +
-                                "'" + addDate + "'," +
                                 "'" + userid + "'," +
                                 "'" + addDate + "'," +
                                 "'" + Computer + "'," +
@@ -163,10 +178,10 @@ namespace Empire_ERP.Infrastructure.Repositories
                                 "'" + Postal + "'," +
                                 "'" + Postal + "'," +
                                 "'Y'," +
-                                "'" + common.MenuID + "'," +
+                                SqlNumber(common.MenuID) + "," +
                                 "'T')";
                             command.ExecuteNonQuery();
-                            item.ID = nextId;
+                            item.PAYROLL_MONTH = payrollMonthText;
                             item.IS_GENERATED = true;
                         }
 
@@ -213,13 +228,18 @@ namespace Empire_ERP.Infrastructure.Repositories
             return rows;
         }
 
-        private bool IsSalaryAlreadyGenerated(DateTime salaryMonth)
+        private bool IsFuturePayrollMonth(DateTime payrollMonth)
+        {
+            DateTime currentMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            return payrollMonth > currentMonth;
+        }
+
+        private bool IsSalaryAlreadyGenerated(string payrollMonthText)
         {
             using (SqlConnection connection = new SqlConnection(new SQLService().getconnstring()))
             {
                 string query = "SELECT COUNT(1) FROM " + TableName +
-                               " WHERE DLT = 'T' AND YEAR(SALARY_MONTH) = " + salaryMonth.Year +
-                               " AND MONTH(SALARY_MONTH) = " + salaryMonth.Month;
+                               " WHERE DLT = 'T' AND PAYROLL_MONTH = " + SqlString(payrollMonthText);
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     connection.Open();
@@ -228,33 +248,12 @@ namespace Empire_ERP.Infrastructure.Repositories
             }
         }
 
-        private void ResolveEmployeeIds(List<SalaryGenerate> rows)
-        {
-            using (SqlConnection connection = new SqlConnection(new SQLService().getconnstring()))
-            {
-                connection.Open();
-                foreach (var item in rows)
-                {
-                    if (string.IsNullOrWhiteSpace(item.EMPLOYEE_CODE))
-                    {
-                        continue;
-                    }
-
-                    string query = "SELECT TOP 1 ID FROM TBL_EMP_REG WHERE EMPLOYEE_CODE = " + SqlString(item.EMPLOYEE_CODE) + " AND DLT = 'T'";
-                    using (SqlCommand command = new SqlCommand(query, connection))
-                    {
-                        object result = command.ExecuteScalar();
-                        if (result != null && result != DBNull.Value)
-                        {
-                            item.EMPLOYEE_ID = Convert.ToInt32(result);
-                        }
-                    }
-                }
-            }
-        }
-
         private SalaryGenerate MapRow(SqlDataReader reader, DateTime? fromDate, DateTime? toDate)
         {
+            string payrollMonthDisplay = fromDate.HasValue
+                ? fromDate.Value.ToString("MMMM yyyy", CultureInfo.InvariantCulture)
+                : ReadString(reader, "PAYROLL_MONTH");
+
             return new SalaryGenerate
             {
                 FROM_DATE = fromDate,
@@ -265,7 +264,7 @@ namespace Empire_ERP.Infrastructure.Repositories
                 EMP_NAME = ReadString(reader, "EMP_NAME"),
                 DESIGNATION = ReadString(reader, "DESIGNATION"),
                 DEPARTMENT = ReadString(reader, "DEPARTMENT"),
-                PAYROLL_MONTH = ReadString(reader, "PAYROLL_MONTH"),
+                PAYROLL_MONTH = payrollMonthDisplay,
                 PRESENT_DAYS = ReadDouble(reader, "PRESENT_DAYS"),
                 SUNDAY_DAYS = ReadDouble(reader, "SUNDAY_DAYS"),
                 WORKING_DAYS = ReadDouble(reader, "WORKING_DAYS"),
@@ -334,6 +333,52 @@ namespace Empire_ERP.Infrastructure.Repositories
                 return "NULL";
             }
             return value.Value.ToString(CultureInfo.InvariantCulture);
+        }
+
+        private string SqlInt(double? value)
+        {
+            if (value == null)
+            {
+                return "NULL";
+            }
+            return Convert.ToInt32(Math.Round(value.Value)).ToString(CultureInfo.InvariantCulture);
+        }
+
+        private string SqlInt(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return "NULL";
+            }
+            if (int.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out int result))
+            {
+                return result.ToString(CultureInfo.InvariantCulture);
+            }
+            if (double.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out double dbl))
+            {
+                return Convert.ToInt32(Math.Round(dbl)).ToString(CultureInfo.InvariantCulture);
+            }
+            return "NULL";
+        }
+
+        private string SqlTime(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return "NULL";
+            }
+
+            if (TimeSpan.TryParse(value, CultureInfo.InvariantCulture, out TimeSpan time))
+            {
+                return "'" + time.ToString(@"hh\:mm\:ss", CultureInfo.InvariantCulture) + "'";
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dateTime))
+            {
+                return "'" + dateTime.ToString("HH:mm:ss", CultureInfo.InvariantCulture) + "'";
+            }
+
+            return SqlString(value);
         }
 
         private string SqlString(string? value)

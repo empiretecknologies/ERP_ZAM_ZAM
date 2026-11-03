@@ -76,6 +76,13 @@ var empr_SalaryGenerate = {
             empr_helper.notify("Please select Month and Year.", 2);
             return false;
         }
+        var now = new Date();
+        var currentMonth = now.getMonth() + 1;
+        var currentYear = now.getFullYear();
+        if (period.year > currentYear || (period.year === currentYear && period.month > currentMonth)) {
+            empr_helper.notify("This month is not eligible for Salary Generate.", 2);
+            return false;
+        }
         return true;
     },
     setGenerateButtonState: function () {
