@@ -143,7 +143,7 @@ namespace Empire_ERP.Infrastructure.Repositories
                 List<object> rows = new List<object>();
                 using (SqlConnection connection = new SqlConnection(new SQLService().getconnstring()))
                 {
-                    string query = @"SELECT EMPLOYEE_CODE, EMP_NAME, GROSS_SALARY, TOTAL_ADVANCE, LOAN_INSTALLMENT, NET_SALARY, PAYROLL_MONTH
+                    string query = @"SELECT EMPLOYEE_CODE, EMP_NAME, GROSS_SALARY, TOTAL_ADVANCE, LOAN_INSTALLMENT, ABSENT_DEDUCTION, NET_SALARY, PAYROLL_MONTH
                                      FROM TBL_SALARY_GENERATION
                                      WHERE ISNULL(DLT,'T') = 'T'
                                      ORDER BY EMP_NAME";
@@ -158,16 +158,25 @@ namespace Empire_ERP.Infrastructure.Repositories
                             continue;
                         }
 
+                        double gross = reader["GROSS_SALARY"] == DBNull.Value ? 0 : Convert.ToDouble(reader["GROSS_SALARY"]);
+                        double advance = reader["TOTAL_ADVANCE"] == DBNull.Value ? 0 : Convert.ToDouble(reader["TOTAL_ADVANCE"]);
+                        double loan = reader["LOAN_INSTALLMENT"] == DBNull.Value ? 0 : Convert.ToDouble(reader["LOAN_INSTALLMENT"]);
+                        double absent = reader["ABSENT_DEDUCTION"] == DBNull.Value ? 0 : Convert.ToDouble(reader["ABSENT_DEDUCTION"]);
+                        double net = reader["NET_SALARY"] == DBNull.Value
+                            ? Math.Max(gross - advance - loan - absent, 0)
+                            : Convert.ToDouble(reader["NET_SALARY"]);
+
                         rows.Add(new
                         {
                             key = reader["EMPLOYEE_CODE"] == DBNull.Value ? (int?)null : Convert.ToInt32(reader["EMPLOYEE_CODE"]),
                             value = Convert.ToString(reader["EMP_NAME"]),
                             EMP_CODE = reader["EMPLOYEE_CODE"] == DBNull.Value ? (int?)null : Convert.ToInt32(reader["EMPLOYEE_CODE"]),
                             EMP_NAME = Convert.ToString(reader["EMP_NAME"]),
-                            GROSS_SALARY = reader["GROSS_SALARY"] == DBNull.Value ? 0 : Convert.ToDouble(reader["GROSS_SALARY"]),
-                            ADVANCE = reader["TOTAL_ADVANCE"] == DBNull.Value ? 0 : Convert.ToDouble(reader["TOTAL_ADVANCE"]),
-                            LOAN = reader["LOAN_INSTALLMENT"] == DBNull.Value ? 0 : Convert.ToDouble(reader["LOAN_INSTALLMENT"]),
-                            NET_SALARY = reader["NET_SALARY"] == DBNull.Value ? 0 : Convert.ToDouble(reader["NET_SALARY"])
+                            GROSS_SALARY = gross,
+                            ADVANCE = advance,
+                            LOAN = loan,
+                            ABSENT = absent,
+                            NET_SALARY = net
                         });
                     }
                     reader.Close();
@@ -315,6 +324,7 @@ namespace Empire_ERP.Infrastructure.Repositories
                                 string grossSalary = item.GROSS_SALARY == null ? "NULL" : item.GROSS_SALARY.Value.ToString(CultureInfo.InvariantCulture);
                                 string advance = item.ADVANCE == null ? "NULL" : item.ADVANCE.Value.ToString(CultureInfo.InvariantCulture);
                                 string loan = item.LOAN == null ? "NULL" : item.LOAN.Value.ToString(CultureInfo.InvariantCulture);
+                                string absent = item.ABSENT == null ? "NULL" : item.ABSENT.Value.ToString(CultureInfo.InvariantCulture);
                                 string netSalary = item.NET_SALARY == null ? "NULL" : item.NET_SALARY.Value.ToString(CultureInfo.InvariantCulture);
                                 string payrollMonth = item.PAYROLL_MONTH == null ? "NULL" : "'" + item.PAYROLL_MONTH.Value.ToString("yyyy-MM-dd HH:mm:ss") + "'";
                                 string chqDate = item.CHQ_DATE == null ? "NULL" : "'" + item.CHQ_DATE.Value.ToString("yyyy-MM-dd HH:mm:ss") + "'";
@@ -347,7 +357,7 @@ namespace Empire_ERP.Infrastructure.Repositories
                                                 "(TRAN_ID, V_DATE, VOUCHER_NO, BOOK_TYPE, REMARKS, BCODE, PERIOD_ID, " +
                                                 "ADD_USER_ID, ADD_DATE, ADD_COMPUTER_NAME, ADD_IP_ADDRESS, EDIT_USER_ID, EDIT_DATE, " +
                                                 "EDIT_COMPUTER_NAME, EDIT_IP_ADDRESS, ADD_POSTALCODE, EDIT_POSTALCODE, ASTATUS, MENU_ID, " +
-                                                "DLT, DT_CODE, EMP_CODE, GROSS_SALARY, ADVANCE, LOAN, NET_SALARY, CHQ_NO, CHQ_DATE, DT_DESC, PAYROLL_MONTH) " +
+                                                "DLT, DT_CODE, EMP_CODE, GROSS_SALARY, ADVANCE, LOAN, ABSENT, NET_SALARY, CHQ_NO, CHQ_DATE, DT_DESC, PAYROLL_MONTH) " +
                                                 $"VALUES " +
                                                 $"('{code}', {vDate}, '{voucherNo}', {bookType}, {SqlValue(item.REMARKS)}, '{branch}', " +
                                                 $"'{periodID}', '{userid}', '{now}', " +
@@ -355,7 +365,7 @@ namespace Empire_ERP.Infrastructure.Repositories
                                                 $"'{userid}', '{now}', '{computerName}', " +
                                                 $"'{ip}', '{postalCode}', '{postalCode}', " +
                                                 $"'{item.ASTATUS}', '{menuID}', 'T', '{item.DT_CODE}', " +
-                                                $"{empCode}, {grossSalary}, {advance}, {loan}, {netSalary}, " +
+                                                $"{empCode}, {grossSalary}, {advance}, {loan}, {absent}, {netSalary}, " +
                                                 $"{SqlValue(item.CHQ_NO)}, {chqDate}, {SqlValue(item.DT_DESC)}, {payrollMonth})";
                                         command.CommandText = query;
                                         command.ExecuteNonQuery();
@@ -378,7 +388,7 @@ namespace Empire_ERP.Infrastructure.Repositories
                                                     "(TRAN_ID, V_DATE, VOUCHER_NO, BOOK_TYPE, REMARKS, BCODE, PERIOD_ID, " +
                                                     "ADD_USER_ID, ADD_DATE, ADD_COMPUTER_NAME, ADD_IP_ADDRESS, EDIT_USER_ID, EDIT_DATE, " +
                                                     "EDIT_COMPUTER_NAME, EDIT_IP_ADDRESS, ADD_POSTALCODE, EDIT_POSTALCODE, ASTATUS, MENU_ID, " +
-                                                    "DLT, DT_CODE, EMP_CODE, GROSS_SALARY, ADVANCE, LOAN, NET_SALARY, CHQ_NO, CHQ_DATE, DT_DESC, PAYROLL_MONTH) " +
+                                                    "DLT, DT_CODE, EMP_CODE, GROSS_SALARY, ADVANCE, LOAN, ABSENT, NET_SALARY, CHQ_NO, CHQ_DATE, DT_DESC, PAYROLL_MONTH) " +
                                                     $"VALUES " +
                                                     $"('{item.TRAN_ID}', {vDate}, {SqlValue(item.VOUCHER_NO)}, {bookType}, {SqlValue(item.REMARKS)}, '{branch}', " +
                                                     $"'{periodID}', '{userid}', '{now}', " +
@@ -386,7 +396,7 @@ namespace Empire_ERP.Infrastructure.Repositories
                                                     $"'{userid}', '{now}', '{computerName}', " +
                                                     $"'{ip}', '{postalCode}', '{postalCode}', " +
                                                     $"'{item.ASTATUS}', '{menuID}', 'T', '{item.DT_CODE}', " +
-                                                    $"{empCode}, {grossSalary}, {advance}, {loan}, {netSalary}, " +
+                                                    $"{empCode}, {grossSalary}, {advance}, {loan}, {absent}, {netSalary}, " +
                                                     $"{SqlValue(item.CHQ_NO)}, {chqDate}, {SqlValue(item.DT_DESC)}, {payrollMonth})";
                                             command.CommandText = query;
                                             command.ExecuteNonQuery();
@@ -420,6 +430,7 @@ namespace Empire_ERP.Infrastructure.Repositories
                                                 $"GROSS_SALARY = {grossSalary}, " +
                                                 $"ADVANCE = {advance}, " +
                                                 $"LOAN = {loan}, " +
+                                                $"ABSENT = {absent}, " +
                                                 $"NET_SALARY = {netSalary}, " +
                                                 $"CHQ_NO = {SqlValue(item.CHQ_NO)}, " +
                                                 $"CHQ_DATE = {chqDate}, " +
@@ -529,7 +540,7 @@ namespace Empire_ERP.Infrastructure.Repositories
                 List<object> jsonDataResult = new List<object>();
                 using (SqlConnection connection = new SqlConnection(new SQLService().getconnstring()))
                 {
-                    string query = @$"SELECT C.TRAN_ID, C.DT_CODE, C.EMP_CODE, C.GROSS_SALARY, C.ADVANCE, C.LOAN, C.NET_SALARY,
+                    string query = @$"SELECT C.TRAN_ID, C.DT_CODE, C.EMP_CODE, C.GROSS_SALARY, C.ADVANCE, C.LOAN, C.ABSENT, C.NET_SALARY,
                                     C.CHQ_NO, C.CHQ_DATE, C.DT_DESC, SG.EMP_NAME
                                     FROM {table} C
                                     LEFT OUTER JOIN TBL_SALARY_GENERATION SG ON SG.EMPLOYEE_CODE = C.EMP_CODE
@@ -551,6 +562,7 @@ namespace Empire_ERP.Infrastructure.Repositories
                             GROSS_SALARY = reader["GROSS_SALARY"] == DBNull.Value ? (double?)null : Convert.ToDouble(reader["GROSS_SALARY"]),
                             ADVANCE = reader["ADVANCE"] == DBNull.Value ? (double?)null : Convert.ToDouble(reader["ADVANCE"]),
                             LOAN = reader["LOAN"] == DBNull.Value ? (double?)null : Convert.ToDouble(reader["LOAN"]),
+                            ABSENT = reader["ABSENT"] == DBNull.Value ? (double?)null : Convert.ToDouble(reader["ABSENT"]),
                             NET_SALARY = reader["NET_SALARY"] == DBNull.Value ? (double?)null : Convert.ToDouble(reader["NET_SALARY"]),
                             CHQ_NO = Convert.ToString(reader["CHQ_NO"]),
                             CHQ_DATE = reader["CHQ_DATE"] == DBNull.Value ? null : Convert.ToDateTime(reader["CHQ_DATE"]).ToString("yyyy-MM-dd"),
@@ -639,7 +651,7 @@ namespace Empire_ERP.Infrastructure.Repositories
                 {
                     string query = $@"SELECT TOP 1
                         P.TRAN_ID, P.DT_CODE, P.VOUCHER_NO, P.V_DATE, P.EMP_CODE, P.PAYROLL_MONTH,
-                        P.GROSS_SALARY AS PAY_GROSS, P.ADVANCE AS PAY_ADVANCE, P.LOAN AS PAY_LOAN, P.NET_SALARY AS PAY_NET,
+                        P.GROSS_SALARY AS PAY_GROSS, P.ADVANCE AS PAY_ADVANCE, P.LOAN AS PAY_LOAN, P.ABSENT AS PAY_ABSENT, P.NET_SALARY AS PAY_NET,
                         CH.ACT_NAME AS PAYMENT_MODE,
                         SG.EMP_NAME, SG.EMPLOYEE_CODE, SG.DEPARTMENT, SG.DESIGNATION, SG.PAYROLL_MONTH AS SG_PAYROLL_MONTH,
                         SG.WORKING_DAYS, SG.PRESENT_DAYS, SG.SUNDAY_DAYS, SG.ABSENT_DAYS,
@@ -699,7 +711,9 @@ namespace Empire_ERP.Infrastructure.Repositories
                     double loan = reader["PAY_LOAN"] == DBNull.Value
                         ? (reader["LOAN_INSTALLMENT"] == DBNull.Value ? 0 : Convert.ToDouble(reader["LOAN_INSTALLMENT"]))
                         : Convert.ToDouble(reader["PAY_LOAN"]);
-                    double absentDeduction = reader["ABSENT_DEDUCTION"] == DBNull.Value ? 0 : Convert.ToDouble(reader["ABSENT_DEDUCTION"]);
+                    double absentDeduction = reader["PAY_ABSENT"] == DBNull.Value
+                        ? (reader["ABSENT_DEDUCTION"] == DBNull.Value ? 0 : Convert.ToDouble(reader["ABSENT_DEDUCTION"]))
+                        : Convert.ToDouble(reader["PAY_ABSENT"]);
                     double incomeTax = reader["INCOME_TAX"] == DBNull.Value ? 0 : Convert.ToDouble(reader["INCOME_TAX"]);
                     double totalDeductions = absentDeduction + advance + loan + incomeTax;
                     double net = reader["PAY_NET"] == DBNull.Value

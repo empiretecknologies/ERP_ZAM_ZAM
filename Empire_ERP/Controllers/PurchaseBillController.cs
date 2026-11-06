@@ -678,138 +678,6 @@ namespace Empire_ERP.Controllers
             }
         }
 
-        //[HttpPost]
-        //public JsonResult GetPrintReport(PurchaseBillRDLCReport model)
-        //{
-        //    MyHttpResponseMessage response = new MyHttpResponseMessage();
-        //    try
-        //    {
-        //        var filePath = GenerateReport(model);
-        //        if (!String.IsNullOrEmpty(filePath))
-        //        {
-        //            response.data = filePath;
-        //            response.msg = "";
-        //            response.msgType = 1;
-        //        }
-        //        else
-        //        {
-        //            response.msg = "Unable to generate report. Please try again later.";
-        //            response.msgType = 2;
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        string _catchMessage = ex.Message;
-        //        if (ex.InnerException != null)
-        //        {
-        //            _catchMessage += "<br/>" + ex.InnerException.Message;
-        //        }
-        //        response.msg = _catchMessage;
-        //        response.msgType = 2;
-        //    }
-        //    return Json(response);
-        //}
-
-        //private string GenerateReport(PurchaseBillRDLCReport model)
-        //{
-        //    var filePath = "";
-        //    try
-        //    {
-        //        if (model != null && model.TRAN_ID > 0 && model.MD_ID > 0)
-        //        {
-        //            Reports.Datasets.BarcodeReportDataset.PurchaseBillReportDataTable reportDetails = new Reports.Datasets.BarcodeReportDataset.PurchaseBillReportDataTable();
-        //            Reports.Datasets.BarcodeReportDataset.SalesTaxDataTable taxReportDetails = new Reports.Datasets.BarcodeReportDataset.SalesTaxDataTable();
-        //            var responseMessage = _purchaseBillService.GetDataForReport(model, reportDetails, taxReportDetails, CommonHelper.GetValues(HttpContext));
-        //            if (responseMessage.msgType != 1)
-        //            {
-        //                return "";
-        //            }
-        //            var reportData = (CustomPurchaseBillForPrintReport)responseMessage.data;
-
-        //            using (LocalReport report = new LocalReport())
-        //            {
-        //                var path = Path.Combine(_hostingEnvironment.ContentRootPath, @$"Reports\{reportData.Master?.REPORT_NAME}.rdlc");
-        //                var stReader = new StreamReader(path);
-        //                string stringreader = stReader.ReadToEnd();
-        //                byte[] byteArray = Encoding.UTF8.GetBytes(stringreader);
-        //                MemoryStream stream = new MemoryStream(byteArray);
-        //                report.EnableExternalImages = true;
-        //                report.LoadReportDefinition(stream);
-        //                report.DataSources.Clear();
-        //                var companyLogoPath = Path.Combine(_hostingEnvironment.WebRootPath, @$"Client\Company\{reportData.Master?.COMPANY_LOGO}");
-        //                bool? showCompanyLogo = true;
-        //                if (!System.IO.File.Exists(companyLogoPath))
-        //                {
-        //                    showCompanyLogo = false;
-        //                }
-
-        //                ReportParameter parameter = new ReportParameter("CompanyName", reportData.Master?.COMPANY_NAME);
-        //                ReportParameter parameter1 = new ReportParameter("CompanyAddress", reportData.Master?.COMPANY_ADDRESS);
-        //                ReportParameter parameter2 = new ReportParameter("CompanyPhone", reportData.Master?.COMPANY_PHONE);
-        //                ReportParameter parameter3 = new ReportParameter("BranchAddress", reportData.Master?.BRANCH_ADDRESS);
-        //                ReportParameter parameter4 = new ReportParameter("BranchPhone", reportData.Master?.BRANCH_PHONE);
-        //                ReportParameter parameter5 = new ReportParameter("CompanyLogo", new Uri(Path.Combine(_hostingEnvironment.WebRootPath, @$"Client\Company\{reportData.Master?.COMPANY_LOGO}")).AbsoluteUri);
-        //                ReportParameter parameter6 = new ReportParameter("ShowCompanyLogo", Convert.ToString(showCompanyLogo));
-        //                ReportParameter parameter7 = new ReportParameter("Header", reportData.Master?.HEADER_NAME);
-        //                ReportParameter parameter8 = new ReportParameter("InvoiceNumber", reportData.Master?.INVOICE_NUMBER);
-        //                ReportParameter parameter9 = new ReportParameter("Date", reportData.Master?.DATE);
-        //                ReportParameter parameter10 = new ReportParameter("PartyName", reportData.Master?.PARTY_NAME);
-        //                ReportParameter parameter11 = new ReportParameter("ActGrCode", reportData.Master?.ACT_GRCODE);
-        //                ReportParameter parameter12 = new ReportParameter("Sig1", reportData.Master?.SIG1);
-        //                ReportParameter parameter13 = new ReportParameter("Sig2", reportData.Master?.SIG2);
-        //                ReportParameter parameter14 = new ReportParameter("Sig3", reportData.Master?.SIG3);
-        //                ReportParameter parameter15 = new ReportParameter("Sig4", reportData.Master?.SIG4);
-        //                ReportParameter parameter16 = new ReportParameter("CompanyWater", new Uri(Path.Combine(_hostingEnvironment.WebRootPath, @$"Client\Company\{reportData.Master?.COMPANY_WATER}")).AbsoluteUri);
-        //                ReportParameter parameter17 = new ReportParameter("REFERENCENO", reportData.Master?.REFERENCENO);
-        //                ReportParameter parameter18 = new ReportParameter("TERM", reportData.Master?.TERM);
-        //                ReportParameter parameter19 = new ReportParameter("EDITUSERID", reportData.Master?.EDIT_USER_ID);
-        //                ReportParameter parameter20 = new ReportParameter("MENUTERMS", reportData.Master?.MENU_TERMS);
-
-        //                report.SetParameters(new ReportParameter[] { parameter, parameter1, parameter2, parameter3, parameter4, parameter5, parameter6, parameter7, parameter8, parameter9, parameter10, parameter11, parameter12, parameter13, parameter14, parameter15, parameter16, parameter17, parameter18, parameter19, parameter20 });
-        //                report.Refresh();
-        //                if (model.MD_ID == 17 || model.MD_ID == 18)
-        //                {
-        //                    report.DataSources.Add(new ReportDataSource() { Name = "PurchaseBillReportDataSet", Value = reportData.Detail });
-        //                }
-        //                else if (model.MD_ID == 21 || model.MD_ID == 22 || model.MD_ID == 25)
-        //                {
-        //                    report.DataSources.Add(new ReportDataSource() { Name = "SalesTaxReportDataSet", Value = reportData.Detail });
-        //                }
-
-        //                byte[] file;
-        //                string uploadsFolder = Path.Combine(_hostingEnvironment.WebRootPath, @"Client\PurchaseBillReport");
-        //                if (!Directory.Exists(uploadsFolder))
-        //                {
-        //                    Directory.CreateDirectory(uploadsFolder);
-        //                }
-
-        //                if (report.IsReadyForRendering)
-        //                {
-        //                    file = report.Render("PDF");
-        //                    filePath = $"{reportData.Master?.REPORT_NAME}Report_" + Guid.NewGuid().ToString("N").Substring(0, 15) + ".pdf";
-
-        //                    stReader.Close();
-        //                    stReader.Dispose();
-        //                    stream.Flush();
-        //                    stream.Close();
-        //                    stream.Dispose();
-        //                    report.Dispose();
-        //                    string reportPath = Path.Combine(uploadsFolder, filePath);
-        //                    System.IO.File.WriteAllBytes(reportPath, file);
-        //                    filePath = $"/Client/PurchaseBillReport/{filePath}";
-        //                    //string PDfPath = CommonHelper.reportaddWatermark(new Uri(Path.Combine(_hostingEnvironment.WebRootPath, @$"Client\Company\logo_water.png")).AbsoluteUri, filePath, reportPath, file);
-
-        //                }
-        //            }
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-
-        //    }
-        //    return filePath;
-        //}
-
         [HttpPost]
         public JsonResult GetPrintReport(PurchaseBillRDLCReport model)
         {
@@ -895,10 +763,6 @@ namespace Empire_ERP.Controllers
                                     showCompanyLogo = false;
                                 }
 
-                                //if (model.REPORT_NAME == "SaleInvoiceDDJ")
-                                //{
-
-                                //}
                                 ReportParameter paramDetailImageBase = new ReportParameter("BaseImagePath", baseImageUri);
                                 ReportParameter parameter = new ReportParameter("CompanyName", reportData.Master?.COMPANY_NAME);
                                 ReportParameter parameter1 = new ReportParameter("CompanyAddress", reportData.Master?.COMPANY_ADDRESS);
@@ -978,7 +842,7 @@ namespace Empire_ERP.Controllers
                                     var allParams = existingParams.Concat(new[] { paramDetailImageBase }).ToArray();
 
                                     report.SetParameters(allParams);
-                                    report.Refresh(); // 1. Refresh lazmi hai
+                                    report.Refresh(); 
 
                                     report.DataSources.Add(new ReportDataSource() { Name = "PurchaseBillReportDataSet", Value = reportData.Detail });
                                 }
@@ -1040,15 +904,6 @@ namespace Empire_ERP.Controllers
                                         filePath = $"{prefix} - {partyName.Replace("/", "-")} - {voucherNumber}" + ".pdf";
                                     }
 
-                                    //stReader.Close();
-                                    //stReader.Dispose();
-                                    //stream.Flush();
-                                    //stream.Close();
-                                    //stream.Dispose();
-                                    //report.Dispose();
-                                    //string reportPath = Path.Combine(uploadsFolder, filePath);
-                                    //System.IO.File.WriteAllBytes(reportPath, file);
-                                    //filePath = $"/Client/PurchaseBillReport/{filePath}";
                                     stReader.Close();
                                     stReader.Dispose();
                                     stream.Flush();

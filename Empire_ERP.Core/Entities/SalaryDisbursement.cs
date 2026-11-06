@@ -28,6 +28,7 @@ namespace Empire_ERP.Core.Entities
         public double? GROSS_SALARY { get; set; }
         public double? ADVANCE { get; set; }
         public double? LOAN { get; set; }
+        public double? ABSENT { get; set; }
         public double? NET_SALARY { get; set; }
         public string? CHQ_NO { get; set; }
         public DateTime? CHQ_DATE { get; set; }

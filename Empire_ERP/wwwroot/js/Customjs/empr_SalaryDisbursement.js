@@ -153,12 +153,19 @@ var empr_SalaryDisbursement = {
                         newData.grosS_SALARY = selected[0].grosS_SALARY;
                         newData.advance = selected[0].advance;
                         newData.loan = selected[0].loan;
-                        newData.neT_SALARY = selected[0].neT_SALARY;
+                        newData.absent = selected[0].absent;
                         newData.emP_NAME = selected[0].value;
+                        newData.neT_SALARY = empr_SalaryDisbursement.CalculateNet(
+                            selected[0].grosS_SALARY,
+                            selected[0].advance,
+                            selected[0].loan,
+                            selected[0].absent
+                        );
                     } else {
                         newData.grosS_SALARY = null;
                         newData.advance = null;
                         newData.loan = null;
+                        newData.absent = null;
                         newData.neT_SALARY = null;
                         newData.emP_NAME = null;
                     }
@@ -175,13 +182,46 @@ var empr_SalaryDisbursement = {
                 dataField: 'advance',
                 caption: 'Advance',
                 dataType: 'number',
-                format: { type: 'fixedPoint', precision: 2 }
+                format: { type: 'fixedPoint', precision: 2 },
+                setCellValue: function (newData, value, currentRowData) {
+                    newData.advance = value;
+                    newData.neT_SALARY = empr_SalaryDisbursement.CalculateNet(
+                        currentRowData.grosS_SALARY,
+                        value,
+                        currentRowData.loan,
+                        currentRowData.absent
+                    );
+                }
             },
             {
                 dataField: 'loan',
                 caption: 'Loan',
                 dataType: 'number',
-                format: { type: 'fixedPoint', precision: 2 }
+                format: { type: 'fixedPoint', precision: 2 },
+                setCellValue: function (newData, value, currentRowData) {
+                    newData.loan = value;
+                    newData.neT_SALARY = empr_SalaryDisbursement.CalculateNet(
+                        currentRowData.grosS_SALARY,
+                        currentRowData.advance,
+                        value,
+                        currentRowData.absent
+                    );
+                }
+            },
+            {
+                dataField: 'absent',
+                caption: 'Absent',
+                dataType: 'number',
+                format: { type: 'fixedPoint', precision: 2 },
+                setCellValue: function (newData, value, currentRowData) {
+                    newData.absent = value;
+                    newData.neT_SALARY = empr_SalaryDisbursement.CalculateNet(
+                        currentRowData.grosS_SALARY,
+                        currentRowData.advance,
+                        currentRowData.loan,
+                        value
+                    );
+                }
             },
             {
                 dataField: 'neT_SALARY',
@@ -316,6 +356,18 @@ var empr_SalaryDisbursement = {
             }
         }
         return key;
+    },
+
+    CalculateNet: function (gross, advance, loan, absent) {
+        var g = parseFloat(gross);
+        var a = parseFloat(advance);
+        var l = parseFloat(loan);
+        var ab = parseFloat(absent);
+        if (isNaN(g)) g = 0;
+        if (isNaN(a)) a = 0;
+        if (isNaN(l)) l = 0;
+        if (isNaN(ab)) ab = 0;
+        return Math.round((g - a - l - ab) * 100) / 100;
     },
 
     BindSelectBox: function (element, dataSource, selectedValue, onValueChanged) {
@@ -454,6 +506,7 @@ var empr_SalaryDisbursement = {
         { dataField: 'grosS_SALARY', caption: 'Gross Salary' },
         { dataField: 'advance', caption: 'Advance' },
         { dataField: 'loan', caption: 'Loan' },
+        { dataField: 'absent', caption: 'Absent' },
         { dataField: 'neT_SALARY', caption: 'Net Salary' },
         { dataField: 'chQ_NO', caption: 'Ref #' },
         { dataField: 'chQ_DATE', caption: 'Ref Date', dataType: 'date', format: 'dd-MM-yyyy' },
@@ -549,6 +602,7 @@ var empr_SalaryDisbursement = {
                     GROSS_SALARY: obj.grosS_SALARY,
                     ADVANCE: obj.advance,
                     LOAN: obj.loan,
+                    ABSENT: obj.absent,
                     NET_SALARY: obj.neT_SALARY,
                     CHQ_NO: obj.chQ_NO,
                     CHQ_DATE: chqDate,
