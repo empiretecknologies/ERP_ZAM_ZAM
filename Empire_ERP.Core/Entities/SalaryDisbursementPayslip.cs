@@ -42,5 +42,12 @@ namespace Empire_ERP.Core.Entities
         public string? COMPANY_PHONE { get; set; }
         public string? COMPANY_LOGO { get; set; }
         public string? COMPANY_TAGLINE { get; set; }
+        public List<SalaryDisbursementSignature> Signatures { get; set; } = new List<SalaryDisbursementSignature>();
+    }
+
+    public class SalaryDisbursementSignature
+    {
+        public string? Title { get; set; }
+        public string? Designation { get; set; }
     }
 }

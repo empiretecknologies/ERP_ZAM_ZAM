@@ -385,12 +385,25 @@ namespace Empire_ERP.Core.Services
                 .SetFont(normal).SetFontSize(7.5f).SetFontColor(LabelGray).SetMarginBottom(14).SetMultipliedLeading(1.15f));
 
             string dateText = model.V_DATE?.ToString("dd-MM-yyyy") ?? DateTime.Now.ToString("dd-MM-yyyy");
-            var sigTable = new Table(UnitValue.CreatePercentArray(new float[] { 33, 34, 33 }))
-                .UseAllAvailableWidth();
-            sigTable.AddCell(SignatureCell("PREPARED BY", "HR Officer", dateText, normal, bold));
-            sigTable.AddCell(SignatureCell("CHECKED BY", "Accounts Manager", dateText, normal, bold));
-            sigTable.AddCell(SignatureCell("APPROVED BY", "Authorized Signatory", dateText, normal, bold));
-            box.Add(sigTable);
+            var signatures = (model.Signatures ?? new List<SalaryDisbursementSignature>())
+                .Where(s => s != null && !String.IsNullOrWhiteSpace(s.Title))
+                .ToList();
+            if (signatures.Count > 0)
+            {
+                float share = 100f / signatures.Count;
+                float[] widths = new float[signatures.Count];
+                for (int i = 0; i < widths.Length; i++)
+                {
+                    widths[i] = share;
+                }
+
+                var sigTable = new Table(UnitValue.CreatePercentArray(widths)).UseAllAvailableWidth();
+                foreach (var signature in signatures)
+                {
+                    sigTable.AddCell(SignatureCell(signature.Title ?? "", signature.Designation ?? "", dateText, normal, bold));
+                }
+                box.Add(sigTable);
+            }
 
             box.Add(new Paragraph("EMPLOYEE ACKNOWLEDGEMENT")
                 .SetFont(bold).SetFontSize(8.5f).SetFontColor(PrimaryBlue).SetMarginTop(16).SetMarginBottom(6).SetMultipliedLeading(1.05f));
@@ -432,8 +445,18 @@ namespace Empire_ERP.Core.Services
         {
             var cell = new Cell().SetBorder(Border.NO_BORDER).SetPadding(4);
             cell.Add(new Paragraph(title).SetFont(bold).SetFontSize(8).SetFontColor(PrimaryBlue).SetMargin(0).SetMultipliedLeading(1.05f));
-            cell.Add(new Paragraph(role).SetFont(normal).SetFontSize(7).SetFontColor(LabelGray).SetMarginBottom(26).SetMultipliedLeading(1.05f));
-            cell.Add(new Paragraph("____________________").SetFont(normal).SetFontSize(8).SetMargin(0).SetMultipliedLeading(1.05f));
+            if (!String.IsNullOrWhiteSpace(role))
+            {
+                cell.Add(new Paragraph(role).SetFont(normal).SetFontSize(7).SetFontColor(LabelGray).SetMarginTop(1).SetMarginBottom(0).SetMultipliedLeading(1.05f));
+            }
+            cell.Add(new Paragraph(" ")
+                .SetFont(normal)
+                .SetFontSize(8)
+                .SetMarginTop(22)
+                .SetMarginBottom(0)
+                .SetMarginRight(10)
+                .SetBorderBottom(new SolidBorder(LabelGray, 0.6f))
+                .SetMultipliedLeading(1f));
             cell.Add(new Paragraph("Date: " + date).SetFont(normal).SetFontSize(7).SetFontColor(LabelGray).SetMarginTop(3).SetMultipliedLeading(1.05f));
             return cell;
         }

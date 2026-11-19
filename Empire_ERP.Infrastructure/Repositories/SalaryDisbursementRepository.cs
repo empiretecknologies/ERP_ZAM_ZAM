@@ -790,7 +790,8 @@ namespace Empire_ERP.Infrastructure.Repositories
                         LOAN = loan,
                         TOTAL_DEDUCTIONS = totalDeductions,
                         NET_SALARY = net,
-                        NET_SALARY_WORDS = AmountToWords(net)
+                        NET_SALARY_WORDS = AmountToWords(net),
+                        Signatures = BuildSignatures(menu)
                     };
 
                     reader.Close();
@@ -805,6 +806,56 @@ namespace Empire_ERP.Infrastructure.Repositories
                 response.msgType = 2;
             }
             return response;
+        }
+
+        private List<SalaryDisbursementSignature> BuildSignatures(Menu menu)
+        {
+            var signatures = new List<SalaryDisbursementSignature>();
+            AddSignature(signatures, menu?.MENU_SIG1);
+            AddSignature(signatures, menu?.MENU_SIG2);
+            AddSignature(signatures, menu?.MENU_SIG3);
+            AddSignature(signatures, menu?.MENU_SIG4);
+            return signatures;
+        }
+
+        private void AddSignature(List<SalaryDisbursementSignature> signatures, string? value)
+        {
+            if (String.IsNullOrWhiteSpace(value))
+            {
+                return;
+            }
+
+            string text = value.Trim();
+            string title = text;
+            string designation = "";
+            string[] separators = { "\r\n", "\n", "\r", "|", "~" };
+            foreach (string separator in separators)
+            {
+                int index = text.IndexOf(separator, StringComparison.Ordinal);
+                if (index > 0)
+                {
+                    title = text.Substring(0, index).Trim();
+                    designation = text.Substring(index + separator.Length)
+                        .Replace("\r\n", " ")
+                        .Replace("\n", " ")
+                        .Replace("\r", " ")
+                        .Replace("|", " ")
+                        .Replace("~", " ")
+                        .Trim();
+                    break;
+                }
+            }
+
+            if (String.IsNullOrWhiteSpace(title))
+            {
+                return;
+            }
+
+            signatures.Add(new SalaryDisbursementSignature
+            {
+                Title = title,
+                Designation = designation
+            });
         }
 
         private string AmountToWords(double amount)
